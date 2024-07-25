@@ -1,9 +1,7 @@
-from mlalgorithms.clustering.kmeans import KMeans
-from mlalgorithms.distances import euclidian
-
 import numpy as np
 
 def kmeans():
+    from mlalgorithms.clustering.kmeans import KMeans
     kmeans = KMeans(3, 5)
     data = np.array([
         [1, 1],
@@ -22,5 +20,17 @@ def kmeans():
 
     print(predictions)
 
+def linear():
+    X = np.array([[0], [1], [2]])
+    Y = np.array([1, 2, 3])
+
+    # Custom implementation
+    from mlalgorithms.supervised.linear_model import LinearRegression
+    reg = LinearRegression()
+    reg.fit(X, Y)
+    print('weights : ', reg._weights)
+    print('ours pred : ', reg.predict(np.array([[3]])))
+
 if __name__ == "__main__":
     kmeans()
+    linear()
