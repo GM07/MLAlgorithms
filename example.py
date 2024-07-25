@@ -21,16 +21,17 @@ def kmeans():
     print(predictions)
 
 def linear():
-    X = np.array([[0], [1], [2]])
+    X = np.array([[0, 1], [1, 4], [2, 2]])
     Y = np.array([1, 2, 3])
+    TEST = np.array([[3, 2]])
 
     # Custom implementation
-    from mlalgorithms.supervised.linear_model import LinearRegression
-    reg = LinearRegression()
+    from mlalgorithms.supervised.regression import RidgeRegression, LinearRegression
+    reg = RidgeRegression(regularization_coef=0.5)
     reg.fit(X, Y)
     print('weights : ', reg._weights)
-    print('ours pred : ', reg.predict(np.array([[3]])))
+    print('ours pred : ', reg.predict(TEST))
 
 if __name__ == "__main__":
-    kmeans()
+    # kmeans()
     linear()
