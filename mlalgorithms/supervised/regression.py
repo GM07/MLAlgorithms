@@ -28,6 +28,7 @@ class LinearRegression(Model):
         X = self.add_bias(X)
         moore_penrose_inv = np.linalg.inv((X.T.dot(X) + self.get_regularization_coef(X.shape[1])))
         self._weights = moore_penrose_inv.dot(X.T).dot(Y)
+        return self
 
     def predict(self, X):
         return self.add_bias(X) @ self._weights

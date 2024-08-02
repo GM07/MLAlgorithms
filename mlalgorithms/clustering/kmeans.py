@@ -59,6 +59,7 @@ class KMeans(Model):
 
         self._clusters_centroids = centroids
         self._assignments = assigments
+        return self
 
     def predict(self, X):
         """
