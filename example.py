@@ -51,7 +51,23 @@ def naive_bayes():
         % (X_test.shape[0], (y_test != y_pred_2).sum()))
 
 
+def lasso_regression():
+    from sklearn import linear_model
+    clf = linear_model.Lasso(alpha=0.1)
+    from mlalgorithms.supervised.regression import LassoRegression
+    reg = LassoRegression(regularization_coef=0.01, nb_epochs=500)
+
+    X = [[0,0], [1, 1], [2, 2]]
+    Y = [0, 1, 2]
+    clf.fit(X, Y)
+    reg.fit(X, Y)
+    print('expected : ', Y)
+    print('scikit-learn prediction : ', clf.predict(X))
+    print('mlalgorithms prediction : ', reg.predict(X).squeeze())
+
+
 if __name__ == "__main__":
     # kmeans()
     # linear()
-    naive_bayes()
+    # naive_bayes()
+    lasso_regression()
