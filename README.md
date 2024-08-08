@@ -24,7 +24,7 @@ cd MLAlgorithms
 ## Regression
 - [X] Linear Regression
 - [X] Ridge Regression
-- [ ] Lasso Regression
+- [X] Lasso Regression
 - [ ] Logistic Regression
 
 # Bayes
@@ -39,6 +39,9 @@ cd MLAlgorithms
 - [ ] Recurrence Neural Network
 - [ ] Long-Short Term Memory (LSTM)
 - [ ] Transformer
+
+## Metrics
+- [X] RMSE
 
 # References
 - [Scikit-learn](https://scikit-learn.org/stable): Machine Learning in Python, Pedregosa et al., JMLR 12, pp. 2825-2830, 2011.
