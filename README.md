@@ -36,7 +36,7 @@ cd MLAlgorithms
 - [ ] Dense Layer 
 - [ ] Neural Network
 - [ ] Convolutional Neural Network
-- [ ] Recurrence Neural Network
+- [ ] Recurrent Neural Network
 - [ ] Long-Short Term Memory (LSTM)
 - [ ] Transformer
 
