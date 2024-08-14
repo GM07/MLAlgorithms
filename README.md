@@ -25,7 +25,7 @@ cd MLAlgorithms
 - [X] Linear Regression
 - [X] Ridge Regression
 - [X] Lasso Regression
-- [ ] Logistic Regression
+- [X] Logistic Regression
 
 # Bayes
 - [X] Gaussian Naive Bayes

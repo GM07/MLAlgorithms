@@ -64,7 +64,9 @@ class LassoRegression(LinearRegression):
 
     def fit(self, X: NDArray, Y: NDArray):
         X_bias = self.add_bias(np.array(X))
-        Y = np.expand_dims(np.array(Y), -1)
+        Y = np.array(Y)
+        if len(Y.shape) == 1:
+            Y = np.expand_dims(np.array(Y), -1)
         _, nb_features = X_bias.shape
         self._weights = np.random.normal(0, 1, (nb_features, 1))
 
@@ -82,3 +84,52 @@ class LassoRegression(LinearRegression):
         for i in range(X.shape[1]):
             penalty[i] = 1 if self._weights[i] > 0 else -1
         return grad + self.regularization_coef * penalty
+
+class LogisticRegression(LinearRegression):
+    """Linear regression with a sigmoid activation function on top"""
+
+    def __init__(
+        self,
+        learning_rate = 0.1, 
+        nb_epochs = 50,
+        threshold = 0.5,
+        epsilon = 1e-6
+    ) -> None:
+        self.learning_rate = learning_rate
+        self.nb_epochs = nb_epochs
+        self.threshold = threshold
+        self.epsilon = epsilon
+        super().__init__()
+
+    def fit(self, X: NDArray, Y: NDArray):
+        X_bias = self.add_bias(np.array(X))
+        Y = np.array(Y)
+        if len(Y.shape) == 1:
+            Y = np.expand_dims(np.array(Y), -1)
+
+        self.labels = np.unique(Y)
+        assert len(self.labels) == 2, "This classifier only supports two classes"
+        assert set(self.labels) == {0, 1}, "The labels must be 0 and 1"
+
+        _, nb_features = X_bias.shape
+        self._weights = np.random.normal(0, 1, (nb_features, 1))
+
+        for _ in range(self.nb_epochs):
+            grad = self.grad(X_bias, Y)
+            if np.linalg.norm(grad) < self.epsilon:
+                break
+
+            self._weights -= self.learning_rate * grad
+
+    def predict(self, X: NDArray):
+        probas = self.sigmoid(super().predict(np.array(X)))
+        return np.where(probas > 0.5, 1, 0)
+
+    def grad(self, X: NDArray, Y: NDArray):
+        predictions = self.sigmoid(X.dot(self._weights))
+        grad = (1 / Y.shape[0]) * X.T.dot(predictions - Y)
+        return grad
+
+    def sigmoid(self, X: NDArray):
+        return 1 / (1 + np.exp(-X))
+

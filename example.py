@@ -55,19 +55,34 @@ def lasso_regression():
     from sklearn import linear_model
     clf = linear_model.Lasso(alpha=0.1)
     from mlalgorithms.supervised.regression import LassoRegression
-    reg = LassoRegression(regularization_coef=0.01, nb_epochs=500)
+    mla = LassoRegression(regularization_coef=0.01, nb_epochs=500)
 
     X = [[0,0], [1, 1], [2, 2]]
     Y = [0, 1, 2]
     clf.fit(X, Y)
-    reg.fit(X, Y)
+    mla.fit(X, Y)
     print('expected : ', Y)
     print('scikit-learn prediction : ', clf.predict(X))
-    print('mlalgorithms prediction : ', reg.predict(X).squeeze())
+    print('mlalgorithms prediction : ', mla.predict(X).squeeze())
 
+def logistic_regression():
+    from sklearn.linear_model import LogisticRegression as LR
+    clf = LR(penalty=None)
+    from mlalgorithms.supervised.regression import LogisticRegression
+    mla = LogisticRegression()
+    X_train = np.array([[5,6,1,3,7,4,10,1,2,0,5,3,1,4],[1,2,0,2,3,3,9,4,4,3,6,5,3,7]]).T
+    Y_train = np.array([0,0,0,0,0,0,0,1,1,1,1,1,1,1])
+    X_test  = np.array([[2,3,3,3,2,4],[1,1,0,7,6,5]]).T
+    Y_test  = np.array([0,0,0,1,1,1])
+    clf.fit(X_train, Y_train)
+    mla.fit(X_train, Y_train)
+    print('expected : ', Y_test)
+    print('scikit-learn prediction : ', clf.predict(X_test))
+    print('mlalgorithms prediction : ', mla.predict(X_test).squeeze())
 
 if __name__ == "__main__":
     # kmeans()
     # linear()
     # naive_bayes()
-    lasso_regression()
+    # lasso_regression()
+    logistic_regression()
