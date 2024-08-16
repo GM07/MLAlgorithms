@@ -80,9 +80,24 @@ def logistic_regression():
     print('scikit-learn prediction : ', clf.predict(X_test))
     print('mlalgorithms prediction : ', mla.predict(X_test).squeeze())
 
+def pca():
+    import numpy as np
+    from sklearn.decomposition import PCA as PCA2
+    from mlalgorithms.dimensionality_reduction.pca import PCA
+    X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
+    pca = PCA2(n_components=2, svd_solver='full')
+    pca.fit(X)
+    print(pca.explained_variance_ratio_)
+    print(pca.singular_values_)
+    X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
+    pca = PCA(nb_components=2)
+    pca.predict(X)
+    print(pca.sigma)
+
 if __name__ == "__main__":
     # kmeans()
     # linear()
     # naive_bayes()
     # lasso_regression()
-    logistic_regression()
+    # logistic_regression()
+    pca()

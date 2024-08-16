@@ -17,20 +17,24 @@ cd MLAlgorithms
 
 # Algorithms implemented 
 
-## Clustering
-- [X] KMeans
-- [ ] DBSCAN
-
 ## Regression
 - [X] Linear Regression
 - [X] Ridge Regression
 - [X] Lasso Regression
 - [X] Logistic Regression
 
-# Bayes
+## Clustering
+- [X] KMeans
+- [ ] DBSCAN
+
+## Bayes
 - [X] Gaussian Naive Bayes
 - [ ] Bernoulli Naive Bayes
 - [ ] Multinomial Naive Bayes
+
+## Dimensionality reduction
+- [X] PCA
+- [ ] t-SNE
 
 ## Deep Learning
 - [ ] Dense Layer 
