@@ -94,10 +94,20 @@ def pca():
     pca.predict(X)
     print(pca.sigma)
 
+def tSNE():
+    from sklearn.datasets import load_digits
+    from mlalgorithms.dimensionality_reduction.t_sne import tSNE
+    import matplotlib.pyplot as plt
+    X, y = load_digits(return_X_y=True)
+    t_sne = tSNE(nb_dims=2, learning_rate=200, perplexity=40)
+    res = t_sne.predict(X)
+    plt.scatter(res[:, 0], res[:, 1], s=20, c=y)
+    plt.show()
 if __name__ == "__main__":
     # kmeans()
     # linear()
     # naive_bayes()
     # lasso_regression()
     # logistic_regression()
-    pca()
+    # pca()
+    tSNE()

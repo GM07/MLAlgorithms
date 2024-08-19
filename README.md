@@ -34,15 +34,7 @@ cd MLAlgorithms
 
 ## Dimensionality reduction
 - [X] PCA
-- [ ] t-SNE
-
-## Deep Learning
-- [ ] Dense Layer 
-- [ ] Neural Network
-- [ ] Convolutional Neural Network
-- [ ] Recurrent Neural Network
-- [ ] Long-Short Term Memory (LSTM)
-- [ ] Transformer
+- [X] t-SNE
 
 ## Metrics
 - [X] RMSE
