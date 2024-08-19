@@ -27,10 +27,10 @@ cd MLAlgorithms
 - [X] KMeans
 - [ ] DBSCAN
 
-## Bayes
+## Naive Bayes
 - [X] Gaussian Naive Bayes
-- [ ] Bernoulli Naive Bayes
-- [ ] Multinomial Naive Bayes
+- [X] Bernoulli Naive Bayes
+- [X] Multinomial Naive Bayes
 
 ## Dimensionality reduction
 - [X] PCA

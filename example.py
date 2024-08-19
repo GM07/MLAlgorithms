@@ -50,6 +50,36 @@ def naive_bayes():
     print("Number of mislabeled points out of a total %d points : %d"
         % (X_test.shape[0], (y_test != y_pred_2).sum()))
 
+def bernoulli_naive_bayes():
+    import numpy as np
+    rng = np.random.RandomState(1)
+    X = rng.randint(5, size=(6, 100))
+    Y = np.array([1, 2, 3, 4, 4, 5])
+    from sklearn.naive_bayes import BernoulliNB
+    from mlalgorithms.supervised.naive_bayes import BernoulliNaiveBayes
+    clf = BernoulliNB()
+    clf.fit(X, Y)
+    print(clf.predict(X[4:5]))
+    
+    bnb = BernoulliNaiveBayes()
+    bnb.fit(X, Y)
+    print(bnb.predict(X[4:5]))
+
+def multinomial_naive_bayes():
+    import numpy as np
+    rng = np.random.RandomState(1)
+    X = rng.randint(5, size=(6, 100))
+    Y = np.array([1, 2, 3, 4, 4, 5])
+    from sklearn.naive_bayes import MultinomialNB
+    from mlalgorithms.supervised.naive_bayes import MultinomialNaiveBayes
+    clf = MultinomialNB()
+    clf.fit(X, Y)
+    print(clf.predict(X[4:5]))
+    
+    bnb = MultinomialNaiveBayes()
+    bnb.fit(X, Y)
+    print(bnb.predict(X[4:5]))
+
 
 def lasso_regression():
     from sklearn import linear_model
@@ -107,7 +137,9 @@ if __name__ == "__main__":
     # kmeans()
     # linear()
     # naive_bayes()
+    # bernoulli_naive_bayes()
+    multinomial_naive_bayes()
     # lasso_regression()
     # logistic_regression()
     # pca()
-    tSNE()
+    # tSNE()
