@@ -1,5 +1,33 @@
 import numpy as np
+import torch
 
+def load_classification_data():
+    from sklearn.datasets import load_iris
+    from sklearn.model_selection import train_test_split
+    X, Y = load_iris(return_X_y=True)
+    return train_test_split(X, Y, test_size=0.01, random_state=0)
+
+def load_binary_classification_data():
+    import numpy as np
+    from sklearn.model_selection import train_test_split
+    rng = np.random.RandomState(1)
+    X = rng.randint(5, size=(6, 100))
+    Y = np.array([1, 2, 3, 4, 4, 5])
+    return X, X[4:5], Y, Y[4:5]
+    # return train_test_split(X, Y, test_size=0.2, random_state=0)
+
+def print_name(func):
+    def wrapper(*args, **kwargs):
+        print('=' * 100)
+        print(f"Executing function: {func.__name__}")
+        print('-' * 100)
+        return_value = func(*args, **kwargs)
+        print('=' * 100)
+        print()
+        return return_value
+    return wrapper
+
+@print_name
 def kmeans():
     from mlalgorithms.clustering.kmeans import KMeans
     kmeans = KMeans(3, 5)
@@ -13,88 +41,94 @@ def kmeans():
     kmeans.fit(data)
     print(kmeans._clusters_centroids)
 
-    predictions = kmeans.predict(np.array([
+    predictions = kmeans.predict([
         [1.5, 1.5],
         [-15.0, 0.0]
-    ]))
+    ])
 
     print(predictions)
 
-def linear():
-    X = np.array([[0, 1], [1, 4], [2, 2]])
-    Y = np.array([1, 2, 3])
-    TEST = np.array([[3, 2]])
+@print_name
+def ridge_regression():
+    X = torch.Tensor([[0, 1], [1, 4], [2, 2]])
+    Y = torch.Tensor([1, 2, 3])
+    TEST = torch.Tensor([[3, 2]])
 
     # Custom implementation
-    from mlalgorithms.supervised.regression import RidgeRegression, LinearRegression
+    from mlalgorithms.supervised.regression import RidgeRegression
+    from sklearn.linear_model import RidgeClassifier
+    clf = RidgeClassifier(alpha=0.5)
+    clf.fit(X, Y)
+
     reg = RidgeRegression(regularization_coef=0.5)
     reg.fit(X, Y)
-    print('weights : ', reg._weights)
-    print('ours pred : ', reg.predict(TEST))
 
+    print('SKLEARN : ', clf.predict(TEST))
+    print('MLALGORITHMS : : ', reg.predict(TEST))
+
+@print_name
 def naive_bayes():
-    from sklearn.datasets import load_iris
-    from sklearn.model_selection import train_test_split
+    X_train, X_test, Y_train, Y_test = load_classification_data()
+    print('EXPECTED \t: \t', Y_test)
+
     from sklearn.naive_bayes import GaussianNB
+    gnb = GaussianNB()
+    y_pred = gnb.fit(X_train, Y_train).predict(X_test)    
+
+    print("SKLEARN \t: \t", y_pred)
 
     from mlalgorithms.supervised.naive_bayes import GaussianNaiveBayes
-    X, y = load_iris(return_X_y=True)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5, random_state=0)
-    gnb = GaussianNB()
-    y_pred = gnb.fit(X_train, y_train).predict(X_test)
     gnb2 = GaussianNaiveBayes()
-    y_pred_2 = gnb2.fit(X_train, y_train).predict(X_test)
-
-    print("Number of mislabeled points out of a total %d points : %d"
-        % (X_test.shape[0], (y_test != y_pred).sum()))
-    print("Number of mislabeled points out of a total %d points : %d"
-        % (X_test.shape[0], (y_test != y_pred_2).sum()))
-
-def bernoulli_naive_bayes():
-    import numpy as np
-    rng = np.random.RandomState(1)
-    X = rng.randint(5, size=(6, 100))
-    Y = np.array([1, 2, 3, 4, 4, 5])
-    from sklearn.naive_bayes import BernoulliNB
-    from mlalgorithms.supervised.naive_bayes import BernoulliNaiveBayes
-    clf = BernoulliNB()
-    clf.fit(X, Y)
-    print(clf.predict(X[4:5]))
+    y_pred_2 = gnb2.fit(torch.tensor(X_train), torch.tensor(Y_train)).predict(torch.tensor(X_test))
+    print("MLALGORITHMS \t: \t", y_pred_2)
     
-    bnb = BernoulliNaiveBayes()
-    bnb.fit(X, Y)
-    print(bnb.predict(X[4:5]))
+@print_name
+def bernoulli_naive_bayes():
+    X_train, X_test, Y_train, Y_test = load_binary_classification_data()
+    print('EXPECTED \t: \t', Y_test)
 
+    from sklearn.naive_bayes import BernoulliNB
+    clf = BernoulliNB()
+    clf.fit(X_train, Y_train)
+    print('SKLEARN \t: \t', clf.predict(X_test))
+
+    from mlalgorithms.supervised.naive_bayes import BernoulliNaiveBayes
+    bnb = BernoulliNaiveBayes()
+    bnb.fit(torch.tensor(X_train), torch.tensor(Y_train))
+    print('MLALGORITHMS \t: \t', bnb.predict(torch.tensor(X_test, dtype=torch.float32)))
+
+@print_name
 def multinomial_naive_bayes():
-    import numpy as np
-    rng = np.random.RandomState(1)
-    X = rng.randint(5, size=(6, 100))
-    Y = np.array([1, 2, 3, 4, 4, 5])
+    X_train, X_test, Y_train, Y_test = load_classification_data()
+    print('EXPECTED \t: \t', Y_test)
+
     from sklearn.naive_bayes import MultinomialNB
     from mlalgorithms.supervised.naive_bayes import MultinomialNaiveBayes
     clf = MultinomialNB()
-    clf.fit(X, Y)
-    print(clf.predict(X[4:5]))
-    
-    bnb = MultinomialNaiveBayes()
-    bnb.fit(X, Y)
-    print(bnb.predict(X[4:5]))
+    clf.fit(X_train, Y_train)
+    print('SKLEARN \t: \t', clf.predict(X_test))
 
+    bnb = MultinomialNaiveBayes(alpha_smoothing=1.0)
+    bnb.fit(torch.tensor(X_train), torch.tensor(Y_train))
+    print('MLALGORITHMS \t: \t', bnb.predict(torch.tensor(X_test, dtype=torch.float32)))
 
+@print_name
 def lasso_regression():
+
+    X = [[0,0], [1, 1], [2, 2]]
+    Y = [0, 1, 2]
+
     from sklearn import linear_model
     clf = linear_model.Lasso(alpha=0.1)
     from mlalgorithms.supervised.regression import LassoRegression
     mla = LassoRegression(regularization_coef=0.01, nb_epochs=500)
-
-    X = [[0,0], [1, 1], [2, 2]]
-    Y = [0, 1, 2]
     clf.fit(X, Y)
     mla.fit(X, Y)
     print('expected : ', Y)
     print('scikit-learn prediction : ', clf.predict(X))
     print('mlalgorithms prediction : ', mla.predict(X).squeeze())
 
+@print_name
 def logistic_regression():
     from sklearn.linear_model import LogisticRegression as LR
     clf = LR(penalty=None)
@@ -109,7 +143,8 @@ def logistic_regression():
     print('expected : ', Y_test)
     print('scikit-learn prediction : ', clf.predict(X_test))
     print('mlalgorithms prediction : ', mla.predict(X_test).squeeze())
-
+    
+@print_name
 def pca():
     import numpy as np
     from sklearn.decomposition import PCA as PCA2
@@ -124,6 +159,7 @@ def pca():
     pca.predict(X)
     print(pca.sigma)
 
+@print_name
 def tSNE():
     from sklearn.datasets import load_digits
     from mlalgorithms.dimensionality_reduction.t_sne import tSNE
@@ -133,13 +169,17 @@ def tSNE():
     res = t_sne.predict(X)
     plt.scatter(res[:, 0], res[:, 1], s=20, c=y)
     plt.show()
+
 if __name__ == "__main__":
     # kmeans()
-    # linear()
-    # naive_bayes()
-    # bernoulli_naive_bayes()
+
+    naive_bayes()
+    bernoulli_naive_bayes()
     multinomial_naive_bayes()
+
+    ridge_regression()
     # lasso_regression()
     # logistic_regression()
+    
     # pca()
     # tSNE()

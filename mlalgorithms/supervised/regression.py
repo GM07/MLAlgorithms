@@ -1,7 +1,6 @@
-from numpy.typing import NDArray
 from mlalgorithms.model import Model
 
-import numpy as np
+import torch
 
 class LinearRegression(Model):
 
@@ -18,27 +17,27 @@ class LinearRegression(Model):
 
         self._weights = None
 
-    def fit(self, X: NDArray, Y: NDArray):
+    def fit(self, X: torch.Tensor, Y: torch.Tensor):
         """
         Fits the linear model to the data
 
-        X : numpy array of shape (nb_samples, nb_features)
+        X : tensor of shape (nb_samples, nb_features)
 
-        Y : numpy array of shape (nb_samples)
+        Y : tensor of shape (nb_samples)
         """
         X = self.add_bias(X)
-        moore_penrose_inv = np.linalg.inv((X.T.dot(X) + self.get_regularization_coef(X.shape[1])))
-        self._weights = moore_penrose_inv.dot(X.T).dot(Y)
+        moore_penrose_inv: torch.Tensor = torch.linalg.inv(X.T.matmul(X) + self.get_regularization_coef(X.shape[-1]))
+        self._weights = moore_penrose_inv.matmul(X.T).matmul(Y)
         return self
 
-    def predict(self, X: NDArray):
+    def predict(self, X: torch.Tensor):
         return self.add_bias(X) @ self._weights
 
-    def add_bias(self, X: NDArray):
-        return np.concatenate([X, np.ones((X.shape[0], 1))], axis=1)
+    def add_bias(self, X: torch.Tensor):
+        return torch.concatenate([X, torch.ones((X.shape[0], 1))], axis=1)
 
     def get_regularization_coef(self, nb_features: int):
-        return np.zeros((nb_features, nb_features))
+        return torch.zeros((nb_features, nb_features))
 
 
 class RidgeRegression(LinearRegression):
@@ -48,7 +47,7 @@ class RidgeRegression(LinearRegression):
         self.regularization_coef = regularization_coef
 
     def get_regularization_coef(self, nb_features):
-        return self.regularization_coef * np.identity(nb_features)
+        return self.regularization_coef * torch.eye(nb_features)
 
 class LassoRegression(LinearRegression):
 
@@ -62,25 +61,25 @@ class LassoRegression(LinearRegression):
         self.learning_rate = learning_rate
         self.nb_epochs = nb_epochs
 
-    def fit(self, X: NDArray, Y: NDArray):
-        X_bias = self.add_bias(np.array(X))
-        Y = np.array(Y)
+    def fit(self, X: torch.Tensor, Y: torch.Tensor):
+        X_bias = self.add_bias(torch.tensor(X))
+        Y = torch.tensor(Y)
         if len(Y.shape) == 1:
-            Y = np.expand_dims(np.array(Y), -1)
+            Y = torch.unsqueeze(torch.tensor(Y), -1)
         _, nb_features = X_bias.shape
-        self._weights = np.random.normal(0, 1, (nb_features, 1))
+        self._weights = torch.normal(0, 1, (nb_features, 1))
 
         for _ in range(self.nb_epochs):
             grad = self.grad(X_bias, Y)
             self._weights -= self.learning_rate * grad
 
-    def predict(self, X: NDArray):
-        return super().predict(np.array(X))
+    def predict(self, X: torch.Tensor):
+        return super().predict(torch.tensor(X))
 
-    def grad(self, X: NDArray, Y: NDArray):
-        error = X.dot(self._weights) - Y
-        grad = (1 / Y.shape[0]) * X.T.dot(error) + 2 * self.regularization_coef * self._weights
-        penalty = np.zeros(shape=self._weights.shape)
+    def grad(self, X: torch.Tensor, Y: torch.Tensor):
+        error = X.matmul(self._weights) - Y
+        grad = (1 / Y.shape[0]) * X.T.matmul(error) + 2 * self.regularization_coef * self._weights
+        penalty = torch.zeros(size=self._weights.shape)
         for i in range(X.shape[1]):
             penalty[i] = 1 if self._weights[i] > 0 else -1
         return grad + self.regularization_coef * penalty
@@ -101,35 +100,35 @@ class LogisticRegression(LinearRegression):
         self.epsilon = epsilon
         super().__init__()
 
-    def fit(self, X: NDArray, Y: NDArray):
-        X_bias = self.add_bias(np.array(X))
-        Y = np.array(Y)
+    def fit(self, X: torch.Tensor, Y: torch.Tensor):
+        X_bias = self.add_bias(torch.Tensor(X))
+        Y = torch.Tensor(Y)
         if len(Y.shape) == 1:
-            Y = np.expand_dims(np.array(Y), -1)
+            Y = torch.unsqueeze(torch.Tensor(Y), -1)
 
-        self.labels = np.unique(Y)
+        self.labels = torch.unique(Y).tolist()
         assert len(self.labels) == 2, "This classifier only supports two classes"
-        assert set(self.labels) == {0, 1}, "The labels must be 0 and 1"
+        assert set(self.labels) == {0., 1.}, f"The labels must be 0 and 1, but are {set(self.labels)}"
 
         _, nb_features = X_bias.shape
-        self._weights = np.random.normal(0, 1, (nb_features, 1))
+        self._weights = torch.normal(0, 1, (nb_features, 1))
 
         for _ in range(self.nb_epochs):
             grad = self.grad(X_bias, Y)
-            if np.linalg.norm(grad) < self.epsilon:
+            if torch.linalg.norm(grad) < self.epsilon:
                 break
 
             self._weights -= self.learning_rate * grad
 
-    def predict(self, X: NDArray):
-        probas = self.sigmoid(super().predict(np.array(X)))
-        return np.where(probas > 0.5, 1, 0)
+    def predict(self, X: torch.Tensor):
+        probas = self.sigmoid(super().predict(torch.Tensor(X)))
+        return torch.where(probas > 0.5, 1, 0)
 
-    def grad(self, X: NDArray, Y: NDArray):
-        predictions = self.sigmoid(X.dot(self._weights))
-        grad = (1 / Y.shape[0]) * X.T.dot(predictions - Y)
+    def grad(self, X: torch.Tensor, Y: torch.Tensor):
+        predictions = self.sigmoid(X.matmul(self._weights))
+        grad = (1 / Y.shape[0]) * X.T.matmul(predictions - Y)
         return grad
 
-    def sigmoid(self, X: NDArray):
-        return 1 / (1 + np.exp(-X))
+    def sigmoid(self, X: torch.Tensor):
+        return 1 / (1 + torch.exp(-X))
 

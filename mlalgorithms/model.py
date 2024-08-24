@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
-import numpy as np
-from numpy.typing import NDArray
 
-class Model(ABC):
+import torch.nn as nn
+import torch
+
+class Model(nn.Module):
 
     @abstractmethod
-    def fit(self, X: NDArray, Y: NDArray):
+    def fit(self, X: torch.Tensor, Y: torch.Tensor):
         """
         Fits the model to the data
 
@@ -18,7 +19,7 @@ class Model(ABC):
         return self
 
     @abstractmethod
-    def predict(self, X: NDArray):
+    def predict(self, X: torch.Tensor):
         """
         Predicts the classes of samples
 

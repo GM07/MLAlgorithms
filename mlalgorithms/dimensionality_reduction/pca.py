@@ -2,6 +2,7 @@ from numpy.typing import NDArray
 from mlalgorithms.model import Model
 
 import numpy as np
+import torch
 
 class PCA(Model):
 

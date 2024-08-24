@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
 from mlalgorithms.model import Model
 
-import numpy as np
-from numpy.typing import NDArray
+import torch
 
 class GaussianNaiveBayes(Model):
 
@@ -17,7 +16,7 @@ class GaussianNaiveBayes(Model):
         # deviation during predictions
         self.var_smoothing = var_smoothing 
 
-    def fit(self, X: NDArray, Y: NDArray):
+    def fit(self, X: torch.Tensor, Y: torch.Tensor):
         """
         Fits the model to the data
 
@@ -28,13 +27,13 @@ class GaussianNaiveBayes(Model):
         array containing the prediction for all samples
         """
         nb_samples, self.nb_features = X.shape
-        self.labels, counts = np.unique(Y, return_counts=True)
+        self.labels, counts = torch.unique(Y, return_counts=True)
 
         self.nb_classes = len(self.labels)
         self.priors = counts / nb_samples
 
-        self.means = np.zeros((self.nb_classes, self.nb_features))
-        self.vars = np.zeros((self.nb_classes, self.nb_features))
+        self.means = torch.zeros((self.nb_classes, self.nb_features))
+        self.vars = torch.zeros((self.nb_classes, self.nb_features))
 
         for c in range(self.nb_classes):
             # `x_class` contains the samples of the current class
@@ -48,7 +47,7 @@ class GaussianNaiveBayes(Model):
 
         return self
 
-    def predict(self, X: NDArray):
+    def predict(self, X: torch.Tensor):
         """
         Predicts the classes of samples
 
@@ -61,21 +60,22 @@ class GaussianNaiveBayes(Model):
         # We will store the probabilities in a matrix for each sample
         # Note that these probabilities will be computed in log space
         # for numerical stability
-        probabilities = np.zeros((nb_samples, self.nb_classes))
+        probabilities = torch.zeros((nb_samples, self.nb_classes))
 
-        probabilities += np.log(self.priors)
+        probabilities += torch.log(self.priors)
 
         for c in range(self.nb_classes):
             probabilities[:, c] += GaussianNaiveBayes.pdf(X, self.means[c], self.vars[c])
 
-        return self.labels[np.argmax(probabilities, axis=1)]
+        returned_value = self.labels[torch.argmax(probabilities, axis=1)]
+        return returned_value
 
     @staticmethod
-    def pdf(X: NDArray, mean, var):
+    def pdf(X: torch.Tensor, mean, var):
         """
         Computes the gaussian probabilty given an input X, a mean and a variance in the log space
         """
-        return -0.5 * np.sum(np.log(2 * np.pi * np.sqrt(var)) + (X - mean) ** 2 / np.sqrt(var), axis=1)
+        return -0.5 * torch.sum(torch.log(2 * torch.pi * torch.sqrt(var)) + (X - mean) ** 2 / torch.sqrt(var), axis=1)
 
 
 class BernoulliNaiveBayes(Model):
@@ -86,7 +86,7 @@ class BernoulliNaiveBayes(Model):
         self.conditional_probs = None
         self.nb_classes = None
 
-    def fit(self, X: NDArray, Y: NDArray):
+    def fit(self, X: torch.Tensor, Y: torch.Tensor):
         """
         Fits the model to the data
 
@@ -97,12 +97,12 @@ class BernoulliNaiveBayes(Model):
         array containing the prediction for all samples
         """
         nb_samples, self.nb_features = X.shape
-        self.labels, counts = np.unique(Y, return_counts=True)
+        self.labels, counts = torch.unique(Y, return_counts=True)
 
         self.nb_classes = len(self.labels)
         self.priors = counts / nb_samples
 
-        self.conditional_probs = np.zeros((self.nb_classes, self.nb_features))
+        self.conditional_probs = torch.zeros((self.nb_classes, self.nb_features), dtype=torch.float32)
 
         for c in range(self.nb_classes):
             # `x_class` contains the samples of the current class
@@ -113,7 +113,7 @@ class BernoulliNaiveBayes(Model):
 
         return self
 
-    def predict(self, X: NDArray):
+    def predict(self, X: torch.Tensor):
         """
         Predicts the classes of samples
 
@@ -121,24 +121,19 @@ class BernoulliNaiveBayes(Model):
         array containing the features of all samples
         
         """
-        probabilities = np.log(self.priors) + X @ np.log(self.conditional_probs.T)
-        return self.labels[np.argmax(probabilities, axis=1)]
+        probabilities = torch.log(self.priors) + X @ torch.log(self.conditional_probs.T)
+        return self.labels[torch.argmax(probabilities, axis=1)]
 
 
 class MultinomialNaiveBayes(Model):
 
-    def __init__(self, alpha_smoothing = 1e-3) -> None:
+    def __init__(self, alpha_smoothing = 1.0) -> None:
         super().__init__()
         self.priors = None
-        self.means = None
-        self.vars = None
         self.nb_classes = None
-
-        # Used for smoothing the variance since we divide by the standard
-        # deviation during predictions
         self.alpha_smoothing = alpha_smoothing 
 
-    def fit(self, X: NDArray, Y: NDArray):
+    def fit(self, X: torch.Tensor, Y: torch.Tensor):
         """
         Fits the model to the data
 
@@ -149,22 +144,25 @@ class MultinomialNaiveBayes(Model):
         array containing the prediction for all samples
         """
         nb_samples, self.nb_features = X.shape
-        self.labels, counts = np.unique(Y, return_counts=True)
+        self.labels, self.counts = torch.unique(Y, return_counts=True)
 
         self.nb_classes = len(self.labels)
-        self.priors = counts / nb_samples
+        self.log_priors = torch.log(self.counts / nb_samples)
 
-        self.conditional_probs = np.zeros((self.nb_classes, self.nb_features))
+        self.feature_count = torch.zeros((self.nb_classes, self.nb_features))
 
         for c in range(self.nb_classes):
             # `x_class` contains the samples of the current class
-            x_class = X[Y == self.labels[c]]
+            self.feature_count[c] = X[Y == self.labels[c]].sum(dim=0)
 
-            self.conditional_probs[c] = (x_class.sum(axis=0) + self.alpha_smoothing) / (counts[c] + self.alpha_smoothing * self.nb_features + 1)
-
+        smoothed_fc = self.feature_count + self.alpha_smoothing
+        smoothed_cc = smoothed_fc.sum(dim=1).unsqueeze(1)
+        
+        self.log_conditional_probs = torch.log(smoothed_fc) - torch.log(smoothed_cc)
+        
         return self
 
-    def predict(self, X: NDArray):
+    def predict(self, X: torch.Tensor):
         """
         Predicts the classes of samples
 
@@ -172,6 +170,6 @@ class MultinomialNaiveBayes(Model):
         array containing the features of all samples
         
         """
-        probabilities = np.log(self.priors) + X @ np.log(self.conditional_probs.T)
-        return self.labels[np.argmax(probabilities, axis=1)]
+        probabilities = self.log_priors + X @ self.log_conditional_probs.T
+        return self.labels[torch.argmax(probabilities, axis=1)]
 
