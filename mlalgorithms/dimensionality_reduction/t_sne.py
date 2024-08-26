@@ -1,7 +1,6 @@
-from numpy.typing import NDArray
+import torch
 from mlalgorithms.model import Model
 
-import numpy as np
 from tqdm import tqdm
 
 class tSNE(Model):
@@ -30,14 +29,14 @@ class tSNE(Model):
 
         super().__init__()
 
-    def fit(self, X: NDArray, Y: NDArray):
+    def fit(self, X: torch.Tensor, Y: torch.Tensor):
         # In this case Y is not used since t-SNE does not require any training
 
         nb_samples, _ = X.shape
         p_probs = self.p_joint_probs(X, self.perplexity)
 
         history = []
-        y = np.random.normal(loc=0.0, scale=1e-4, size=(nb_samples, self.nb_dims))
+        y = torch.normal(mean=0.0, std=1e-4, size=(nb_samples, self.nb_dims))
         history.append(y); history.append(y)
 
         for i in tqdm(range(self.max_iter)):
@@ -48,17 +47,17 @@ class tSNE(Model):
             history.append(y)
         return y
 
-    def predict(self, X: NDArray):
+    def predict(self, X: torch.Tensor):
         return self.fit(X, None)
 
-    def euclidian_pairwise_distances(self, X: NDArray):
+    def euclidian_pairwise_distances(self, X: torch.Tensor):
         """
         Computes pairwise euclidian distance between every pair of points 
         in the sample matrix X
         """
-        return np.sum((X[None, :] - X[:, None]) ** 2, axis=2)
+        return torch.sum((X[None, :] - X[:, None]) ** 2, axis=2)
 
-    def p_conditional_probs(self, distances: NDArray, stds: NDArray):
+    def p_conditional_probs(self, distances: torch.Tensor, stds: torch.Tensor):
         """
         Returns the conditional probabilities of each pair of samples
         using the given distances matrix and the stds
@@ -66,20 +65,20 @@ class tSNE(Model):
         distances   : shape [nb_samples, nb_samples]
         stds        : shape [nb_samples]
         """
-        numerator = np.exp(-distances / (2 * np.square(stds.reshape((-1,1)))))
-        np.fill_diagonal(numerator, 0.0)
+        numerator = torch.exp(-distances / (2 * torch.square(stds.reshape((-1,1)))))
+        numerator.fill_diagonal_(0.0)
         numerator += self.epsilon
         denominator = numerator.sum(axis=1).reshape([-1, 1])
         return numerator / denominator
 
-    def compute_perplexity(self, conditional_probabilities: NDArray) -> float:
+    def compute_perplexity(self, conditional_probabilities: torch.Tensor) -> float:
         """
         Computes the perplexity of a matrix of conditional probabilities
         
         Returns :
         Perplexity value
         """
-        return 2 ** (-np.sum(conditional_probabilities * np.log2(conditional_probabilities), axis=1))
+        return 2 ** (-torch.sum(conditional_probabilities * torch.log2(conditional_probabilities), axis=1))
 
     def find_stds(self, distances, perplexity):
         """
@@ -92,7 +91,7 @@ class tSNE(Model):
         """
         nb_samples = distances.shape[0]
 
-        stds = np.zeros((nb_samples))
+        stds = torch.zeros((nb_samples))
         for i in range(nb_samples):
             current_sample_distances = distances[i:i+1, :]
 
@@ -101,8 +100,8 @@ class tSNE(Model):
             upper_bound = self.upper_bound_search
             lower_bound = self.lower_bound_search
             for _ in range(self.max_iter_search):
-                perplexity_value = self.compute_perplexity(self.p_conditional_probs(current_sample_distances, np.array([guess])))
-                if np.abs(perplexity_value - perplexity) < self.epsilon:
+                perplexity_value = self.compute_perplexity(self.p_conditional_probs(current_sample_distances, torch.Tensor([guess])))
+                if torch.abs(perplexity_value - perplexity) < self.epsilon:
                     break
                 if perplexity_value > perplexity:
                     upper_bound = guess
@@ -113,29 +112,29 @@ class tSNE(Model):
 
         return stds
     
-    def p_joint_probs(self, samples: NDArray, perplexity):
+    def p_joint_probs(self, samples: torch.Tensor, perplexity):
         distances = self.euclidian_pairwise_distances(samples)
         stds = self.find_stds(distances, perplexity)
         conditionals = self.p_conditional_probs(distances, stds)
         return (conditionals + conditionals.T) / (2 * distances.shape[0])
 
-    def q_joint_probs(self, samples: NDArray):
+    def q_joint_probs(self, samples: torch.Tensor):
         """
         Computes the joint distribution used in the low dimensional representation between pairs of samples 
         using a t-student distribution
         """
         distances = self.euclidian_pairwise_distances(samples)
         numerator = 1 / (1 + distances)
-        np.fill_diagonal(numerator, 0.0)
-        denominator = np.sum(np.sum(numerator))
+        numerator.fill_diagonal_(0.0)
+        denominator = torch.sum(torch.sum(numerator))
         return numerator / denominator
 
-    def grad(self, p_joint: NDArray, q_joint: NDArray, samples: NDArray):
+    def grad(self, p_joint: torch.Tensor, q_joint: torch.Tensor, samples: torch.Tensor):
         """
         Computes the gradient of each sample w.r.t to the KL-divergence
         """
-        prob_diffs = np.expand_dims(p_joint - q_joint, 2)
-        sample_diffs = np.expand_dims(samples, 1) - np.expand_dims(samples, 0)
-        dist_term = np.expand_dims(1 / (1 + self.euclidian_pairwise_distances(samples)), 2)
-        return 4 * np.sum(prob_diffs * sample_diffs * dist_term, axis=1)
+        prob_diffs = torch.unsqueeze(p_joint - q_joint, 2)
+        sample_diffs = torch.unsqueeze(samples, 1) - torch.unsqueeze(samples, 0)
+        dist_term = torch.unsqueeze(1 / (1 + self.euclidian_pairwise_distances(samples)), 2)
+        return 4 * torch.sum(prob_diffs * sample_diffs * dist_term, axis=1)
 

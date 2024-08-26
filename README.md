@@ -1,15 +1,15 @@
 # MLAlgorithms
-Implementation of machine learning algorithms from scratch for learning purposes. Numpy is the only dependency. Scikit-learn is used in the `example.py` file to compare the scikit-learn implementations with the custom made implementations. However, the library itself only depends on Numpy.
+Implementation of machine learning algorithms from scratch for learning purposes. PyTorch is the only dependency. Scikit-learn and Matplotlib are used in the `example.py` file to compare the scikit-learn implementations with the custom made implementations and give examples on how to use the components. However, the library itself only depends on PyTorch.
 
 # Requirements
-- numpy (1.26.4)
+- torch (2.4.0)
 - [Optional] : scikit-learn (1.5.1)
 
 # Installation
 Clone the project and use algorithms. The `example.py` file shows how to use the algorithms.
 
 ```bash
-pip install numpy==1.26.4
+pip install torch==2.4.0
 
 git clone git@github.com:GM07/MLAlgorithms.git
 cd MLAlgorithms

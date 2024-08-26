@@ -47,7 +47,9 @@ class RidgeRegression(LinearRegression):
         self.regularization_coef = regularization_coef
 
     def get_regularization_coef(self, nb_features):
-        return self.regularization_coef * torch.eye(nb_features)
+        reg_matrix = self.regularization_coef * torch.eye(nb_features)
+        reg_matrix[-1, -1] = 0
+        return reg_matrix
 
 class LassoRegression(LinearRegression):
 
@@ -62,10 +64,9 @@ class LassoRegression(LinearRegression):
         self.nb_epochs = nb_epochs
 
     def fit(self, X: torch.Tensor, Y: torch.Tensor):
-        X_bias = self.add_bias(torch.tensor(X))
-        Y = torch.tensor(Y)
+        X_bias = self.add_bias(X)
         if len(Y.shape) == 1:
-            Y = torch.unsqueeze(torch.tensor(Y), -1)
+            Y = torch.unsqueeze(Y, -1)
         _, nb_features = X_bias.shape
         self._weights = torch.normal(0, 1, (nb_features, 1))
 
@@ -74,7 +75,7 @@ class LassoRegression(LinearRegression):
             self._weights -= self.learning_rate * grad
 
     def predict(self, X: torch.Tensor):
-        return super().predict(torch.tensor(X))
+        return super().predict(X)
 
     def grad(self, X: torch.Tensor, Y: torch.Tensor):
         error = X.matmul(self._weights) - Y
@@ -107,8 +108,8 @@ class LogisticRegression(LinearRegression):
             Y = torch.unsqueeze(torch.Tensor(Y), -1)
 
         self.labels = torch.unique(Y).tolist()
-        assert len(self.labels) == 2, "This classifier only supports two classes"
-        assert set(self.labels) == {0., 1.}, f"The labels must be 0 and 1, but are {set(self.labels)}"
+        assert len(self.labels) == 2, f'This classifier only supports two classes, but has {len(self.labels)} classes : {self.labels}'
+        assert set(self.labels) == {0., 1.}, f'The labels must be 0 and 1, but are {set(self.labels)}'
 
         _, nb_features = X_bias.shape
         self._weights = torch.normal(0, 1, (nb_features, 1))

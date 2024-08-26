@@ -1,5 +1,4 @@
 import unittest
-import numpy as np
 from mlalgorithms.clustering.kmeans import KMeans
 
 class KMeansTest(unittest.TestCase):

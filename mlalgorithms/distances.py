@@ -1,5 +1,5 @@
-import numpy as np
+import torch
 
 
 def euclidian(a, b):
-    return np.linalg.norm(a - b)
+    return torch.linalg.norm(a - b)

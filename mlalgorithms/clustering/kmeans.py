@@ -1,8 +1,7 @@
 from mlalgorithms.model import Model
 from mlalgorithms.distances import euclidian
 
-import numpy as np
-
+import torch
 import random
 
 class KMeans(Model):
@@ -12,10 +11,7 @@ class KMeans(Model):
         self.nb_clusters = nb_clusters
         self.nb_iterations = nb_iterations
 
-        self._clusters_centroids = None
-        self._assignments = None
-
-    def fit(self, X, _ = None):
+    def fit(self, X: torch.Tensor, Y: torch.Tensor = None):
         """
         Fits the centroids to the clusters present in the data
 
@@ -27,20 +23,20 @@ class KMeans(Model):
         indices = random.sample(range(nb_samples), k=self.nb_clusters)
 
         # Assign the centroids to these points
-        centroids = X[indices, :].copy()
+        centroids = X[indices, :].clone().detach()
         
         # Assign the points to the clusters
-        assigments = np.zeros(nb_samples, dtype=int)
-        assigments[indices] = range(self.nb_clusters)
+        assigments = torch.zeros(nb_samples, dtype=torch.int64)
+        assigments[indices] = torch.tensor(range(self.nb_clusters))
 
         for i in range(self.nb_iterations):
             # Compute new mean of centroids
             for cluster in range(self.nb_clusters):
-                cluster_samples = np.where(assigments == cluster)
+                cluster_samples = torch.where(assigments == cluster)
                 if len(cluster_samples) > 0:
-                    centroids[cluster] = np.array(X[cluster_samples]).mean(axis=0)
+                    centroids[cluster] = X[cluster_samples].mean(axis=0)
 
-            old_assigments = assigments.copy()
+            old_assigments = assigments.clone().detach()
 
             # Re-assign the data points to the clusters   
             for i, sample in enumerate(X):
@@ -54,29 +50,29 @@ class KMeans(Model):
                     if dist_centroid < dist_current_centroid:
                         assigments[i] = j
 
-            if np.all(old_assigments == assigments):
+            if torch.all(old_assigments == assigments):
                 break
 
-        self._clusters_centroids = centroids
-        self._assignments = assigments
+        self.clusters_centroids = centroids
+        self.assignments = assigments
         return self
 
-    def predict(self, X):
+    def predict(self, X: torch.Tensor):
         """
         Predicts to which clusters a set of samples belongs to
 
         x : numpy array of shape (nb_samples, nb_features)
         """
-        assert self._clusters_centroids is not None, "The fit() method must be called first"
+        assert self.clusters_centroids is not None, "The fit() method must be called first"
 
         nb_samples, _ = X.shape
 
-        closest_clusters = np.zeros(nb_samples, dtype=int)
+        closest_clusters = torch.zeros(nb_samples, dtype=int)
         for sample_index, sample in enumerate(X):
             current_cluster = closest_clusters[sample_index]
-            for cluster in range(1, self._clusters_centroids.shape[0]):
-                current_dist = euclidian(self._clusters_centroids[current_cluster], sample)
-                cluster_dist = euclidian(self._clusters_centroids[cluster], sample)
+            for cluster in range(1, self.clusters_centroids.shape[0]):
+                current_dist = euclidian(self.clusters_centroids[current_cluster], sample)
+                cluster_dist = euclidian(self.clusters_centroids[cluster], sample)
                 if cluster_dist < current_dist:
                     closest_clusters[sample_index] = cluster
 
