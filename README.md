@@ -36,6 +36,14 @@ cd MLAlgorithms
 - [X] PCA
 - [X] t-SNE
 
+## Deep Learning
+- [ ] Neural Network
+- [ ] CNN
+- [ ] LSTM
+- [ ] RNN
+- [ ] Transformer
+- [ ] Diffusion Model
+
 ## Metrics
 - [X] RMSE
 
