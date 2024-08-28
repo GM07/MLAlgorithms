@@ -11,10 +11,10 @@ class Model(nn.Module):
         Fits the model to the data
 
         X   :   (nb_samples, nb_features)
-        array containing the features of all samples
+        tensor containing the features of all samples
         
         Y   :   (nb_samples,)
-        array containing the prediction for all samples
+        tensor containing the prediction for all samples
         """
         return self
 
@@ -24,7 +24,7 @@ class Model(nn.Module):
         Predicts the classes of samples
 
         X   :   (nb_samples, nb_features)
-        array containing the features of all samples
+        tensor containing the features of all samples
         
         """
         pass

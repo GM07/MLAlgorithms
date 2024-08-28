@@ -37,7 +37,7 @@ cd MLAlgorithms
 - [X] t-SNE
 
 ## Deep Learning
-- [ ] Neural Network
+- [X] Neural Network
 - [ ] CNN
 - [ ] LSTM
 - [ ] RNN

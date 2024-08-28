@@ -1,11 +1,14 @@
 import numpy as np
 import torch
 
-def load_classification_data():
+def load_classification_data(return_pt = False):
     from sklearn.datasets import load_iris
     from sklearn.model_selection import train_test_split
     X, Y = load_iris(return_X_y=True)
-    return train_test_split(X, Y, test_size=0.01, random_state=0)
+    a, b, c, d = train_test_split(X, Y, test_size=0.01, random_state=0)
+    if return_pt:
+        return torch.Tensor(a), torch.Tensor(b), torch.tensor(c, dtype=torch.int64), torch.tensor(d, dtype=torch.int64)
+    return a, b, c, d
 
 def load_dimensionality_reduction_data():
     from sklearn.datasets import load_digits
@@ -181,6 +184,22 @@ def tSNE():
     plt.scatter(res[:, 0], res[:, 1], s=20, c=Y)
     plt.show()
 
+@print_name
+def nn():
+    torch.random.manual_seed(42)
+    X_train, X_test, Y_train, Y_test = load_classification_data(return_pt=True)
+    Y_train = torch.nn.functional.one_hot(Y_train).type(dtype=torch.float32)
+
+    from mlalgorithms.deep_learning.neural_network import NeuralNetwork
+    from mlalgorithms.deep_learning.deep_model import TrainingConfig
+    nn = NeuralNetwork(4, 3, hidden_sizes=[3], hidden_activations=['relu'])
+    training_config = TrainingConfig(batch_size=256, device='mps', epochs=500)
+
+    nn.fit(X_train, Y_train, training_config)
+    results = nn.predict(X_test, training_config)
+    results = torch.argmax(results, dim=1).detach().cpu()
+    print(f'Accuracy : {100.0 * (results == Y_test.detach().cpu()).sum(dim=0) / len(Y_test)} %')
+
 if __name__ == "__main__":
     
     # kmeans()
@@ -194,4 +213,6 @@ if __name__ == "__main__":
     # logistic_regression()
     
     # pca()
-    tSNE()
+    # tSNE()
+
+    nn()
