@@ -76,6 +76,8 @@ class LassoRegression(LinearRegression):
             grad = self.grad(X_bias, Y)
             self._weights -= self.learning_rate * grad
 
+        return self
+
     def predict(self, X: torch.Tensor):
         return super().predict(X)
 
@@ -123,6 +125,8 @@ class LogisticRegression(LinearRegression):
                 break
 
             self._weights -= self.learning_rate * grad
+
+        return self
 
     def predict(self, X: torch.Tensor):
         probas = self.sigmoid(super().predict(torch.Tensor(X)))

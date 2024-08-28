@@ -46,7 +46,7 @@ class tSNE(Model):
             m_t = 0.5 if i < 250 else 0.8
             y = history[-1] - self.learning_rate * gradient + m_t * (history[-1] - history[-2])
             history.append(y)
-        return y
+        return self
 
     def predict(self, X: torch.Tensor):
         return self.fit(X, None)
