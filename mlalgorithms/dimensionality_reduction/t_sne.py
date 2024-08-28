@@ -29,6 +29,7 @@ class tSNE(Model):
 
         super().__init__()
 
+    @torch.no_grad()
     def fit(self, X: torch.Tensor, Y: torch.Tensor):
         # In this case Y is not used since t-SNE does not require any training
 

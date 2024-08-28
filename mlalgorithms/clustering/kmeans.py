@@ -11,6 +11,7 @@ class KMeans(Model):
         self.nb_clusters = nb_clusters
         self.nb_iterations = nb_iterations
 
+    @torch.no_grad()
     def fit(self, X: torch.Tensor, Y: torch.Tensor = None):
         """
         Fits the centroids to the clusters present in the data
@@ -23,7 +24,7 @@ class KMeans(Model):
         indices = random.sample(range(nb_samples), k=self.nb_clusters)
 
         # Assign the centroids to these points
-        centroids = X[indices, :].clone().detach()
+        centroids = X[indices, :].clone()
         
         # Assign the points to the clusters
         assigments = torch.zeros(nb_samples, dtype=torch.int64)
@@ -36,7 +37,7 @@ class KMeans(Model):
                 if len(cluster_samples) > 0:
                     centroids[cluster] = X[cluster_samples].mean(axis=0)
 
-            old_assigments = assigments.clone().detach()
+            old_assigments = assigments.clone()
 
             # Re-assign the data points to the clusters   
             for i, sample in enumerate(X):

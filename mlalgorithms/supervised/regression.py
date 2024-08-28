@@ -16,7 +16,8 @@ class LinearRegression(Model):
         super().__init__()
 
         self._weights = None
-
+    
+    @torch.no_grad()
     def fit(self, X: torch.Tensor, Y: torch.Tensor):
         """
         Fits the linear model to the data
@@ -63,6 +64,7 @@ class LassoRegression(LinearRegression):
         self.learning_rate = learning_rate
         self.nb_epochs = nb_epochs
 
+    @torch.no_grad()
     def fit(self, X: torch.Tensor, Y: torch.Tensor):
         X_bias = self.add_bias(X)
         if len(Y.shape) == 1:
@@ -101,6 +103,7 @@ class LogisticRegression(LinearRegression):
         self.epsilon = epsilon
         super().__init__()
 
+    @torch.no_grad()
     def fit(self, X: torch.Tensor, Y: torch.Tensor):
         X_bias = self.add_bias(torch.Tensor(X))
         Y = torch.Tensor(Y)

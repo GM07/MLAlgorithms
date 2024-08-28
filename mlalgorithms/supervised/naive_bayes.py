@@ -16,6 +16,7 @@ class GaussianNaiveBayes(Model):
         # deviation during predictions
         self.var_smoothing = var_smoothing 
 
+    @torch.no_grad()
     def fit(self, X: torch.Tensor, Y: torch.Tensor):
         """
         Fits the model to the data

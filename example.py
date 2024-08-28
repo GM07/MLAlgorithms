@@ -202,7 +202,7 @@ def nn():
 
 if __name__ == "__main__":
     
-    # kmeans()
+    kmeans()
 
     # naive_bayes()
     # bernoulli_naive_bayes()
@@ -215,4 +215,4 @@ if __name__ == "__main__":
     # pca()
     # tSNE()
 
-    nn()
+    # nn()
