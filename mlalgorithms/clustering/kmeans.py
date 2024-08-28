@@ -55,7 +55,7 @@ class KMeans(Model):
                 break
 
         self.clusters_centroids = centroids
-        self.assignments = assigments
+        self.labels = assigments
         return self
 
     def predict(self, X: torch.Tensor):

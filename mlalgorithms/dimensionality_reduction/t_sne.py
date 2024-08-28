@@ -1,5 +1,6 @@
 import torch
 from mlalgorithms.model import Model
+from mlalgorithms.distances import squared_euclidian_pairwise_distances
 
 from tqdm import tqdm
 
@@ -46,17 +47,12 @@ class tSNE(Model):
             m_t = 0.5 if i < 250 else 0.8
             y = history[-1] - self.learning_rate * gradient + m_t * (history[-1] - history[-2])
             history.append(y)
+        self.y = y
         return self
 
     def predict(self, X: torch.Tensor):
-        return self.fit(X, None)
-
-    def euclidian_pairwise_distances(self, X: torch.Tensor):
-        """
-        Computes pairwise euclidian distance between every pair of points 
-        in the sample matrix X
-        """
-        return torch.sum((X[None, :] - X[:, None]) ** 2, axis=2)
+        self.fit(X, None)
+        return self.y
 
     def p_conditional_probs(self, distances: torch.Tensor, stds: torch.Tensor):
         """
@@ -114,7 +110,7 @@ class tSNE(Model):
         return stds
     
     def p_joint_probs(self, samples: torch.Tensor, perplexity):
-        distances = self.euclidian_pairwise_distances(samples)
+        distances = squared_euclidian_pairwise_distances(samples)
         stds = self.find_stds(distances, perplexity)
         conditionals = self.p_conditional_probs(distances, stds)
         return (conditionals + conditionals.T) / (2 * distances.shape[0])
@@ -124,7 +120,7 @@ class tSNE(Model):
         Computes the joint distribution used in the low dimensional representation between pairs of samples 
         using a t-student distribution
         """
-        distances = self.euclidian_pairwise_distances(samples)
+        distances = squared_euclidian_pairwise_distances(samples)
         numerator = 1 / (1 + distances)
         numerator.fill_diagonal_(0.0)
         denominator = torch.sum(torch.sum(numerator))
@@ -136,6 +132,6 @@ class tSNE(Model):
         """
         prob_diffs = torch.unsqueeze(p_joint - q_joint, 2)
         sample_diffs = torch.unsqueeze(samples, 1) - torch.unsqueeze(samples, 0)
-        dist_term = torch.unsqueeze(1 / (1 + self.euclidian_pairwise_distances(samples)), 2)
+        dist_term = torch.unsqueeze(1 / (1 + squared_euclidian_pairwise_distances(samples)), 2)
         return 4 * torch.sum(prob_diffs * sample_diffs * dist_term, axis=1)
 

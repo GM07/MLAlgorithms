@@ -25,7 +25,7 @@ cd MLAlgorithms
 
 ## Clustering
 - [X] KMeans
-- [ ] DBSCAN
+- [X] DBSCAN
 
 ## Naive Bayes
 - [X] Gaussian Naive Bayes
