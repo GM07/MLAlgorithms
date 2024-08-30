@@ -18,8 +18,10 @@ class InferenceConfig:
 @dataclass
 class TrainingConfig(InferenceConfig):
     epochs: int = 100
-    learning_rate: float = 0.01
+    lr: float = 0.01
     # TODO : Add support for multiple optimizers and loss functions
+    optimizer = O.Adam
+    loss_function = nn.CrossEntropyLoss
 
 class DeepModel(nn.Module):
 
@@ -44,8 +46,8 @@ class DeepModel(nn.Module):
         dataset = self.tensors_to_dataset(X, Y)
         training_loader = Data.DataLoader(dataset, batch_size=config.batch_size, shuffle=True)
 
-        optimizer = O.Adam(self.parameters())
-        loss_function = nn.CrossEntropyLoss()
+        optimizer = config.optimizer(self.parameters(), lr=config.lr)
+        loss_function = config.loss_function()
 
         self.to(config.device)
         for epoch in tqdm(range(config.epochs), total=config.epochs):
@@ -61,6 +63,8 @@ class DeepModel(nn.Module):
 
             # TODO : Evaluation
             # self.eval()
+            # if epoch % 20 == 0:
+                # print('Loss : ', loss.item())
 
         return self
 

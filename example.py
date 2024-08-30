@@ -1,6 +1,32 @@
 import numpy as np
 import torch
 
+from mlalgorithms.deep_learning.deep_model import InferenceConfig, TrainingConfig
+
+if torch.cuda.is_available():
+    DEVICE = 'cuda'
+elif torch.backends.mps.is_available():
+    DEVICE = 'mps'
+else:
+    DEVICE = 'cpu'
+
+
+DEFAULT_TRAINING_CONFIG = TrainingConfig(device=DEVICE, batch_size=32)
+DEFAULT_INFERENCE_CONFIG = InferenceConfig(device=DEVICE)
+
+def load_dataset(load_function, return_pt = False, *args, **kwargs):
+    from sklearn.model_selection import train_test_split
+    X, Y = load_function(*args, **kwargs)
+    a, b, c, d = train_test_split(X, Y, test_size=0.01, random_state=0)
+    if return_pt:
+        return torch.Tensor(a), torch.Tensor(b), torch.tensor(c, dtype=torch.int64), torch.tensor(d, dtype=torch.int64)
+    return a, b, c, d
+
+
+def load_regression_data(return_pt = False):
+    from sklearn.datasets import load_diabetes
+    return load_dataset(load_diabetes, return_pt=return_pt, return_X_y=True)
+
 def load_classification_data(return_pt = False):
     from sklearn.datasets import load_iris
     from sklearn.model_selection import train_test_split
@@ -202,7 +228,7 @@ def tSNE():
     import matplotlib.pyplot as plt
     X, Y = load_dimensionality_reduction_data()
 
-    t_sne = tSNE(nb_dims=2, learning_rate=200, perplexity=40)
+    t_sne = tSNE(nb_dims=2, lr=200, perplexity=40)
     res = t_sne.predict(torch.Tensor(X))
     plt.scatter(res[:, 0], res[:, 1], s=20, c=Y)
     plt.show()
@@ -215,13 +241,52 @@ def nn():
 
     from mlalgorithms.deep_learning.neural_network import NeuralNetwork
     from mlalgorithms.deep_learning.deep_model import TrainingConfig
-    nn = NeuralNetwork(4, 3, hidden_sizes=[3], hidden_activations=['relu'])
-    training_config = TrainingConfig(batch_size=256, device='mps', epochs=500)
+    from torch.optim import Adam
+    import torch.nn as nn
 
-    nn.fit(X_train, Y_train, training_config)
-    results = nn.predict(X_test, training_config)
+    network = NeuralNetwork(4, 3, hidden_sizes=[3], hidden_activations=['relu'])
+    training_config = TrainingConfig(batch_size=256, device='mps', epochs=500)
+    training_config.optimizer = Adam
+    training_config.loss_function = nn.CrossEntropyLoss
+
+    network.fit(X_train, Y_train, training_config)
+    results = network.predict(X_test, training_config)
     results = torch.argmax(results, dim=1).detach().cpu()
     print(f'Accuracy : {100.0 * (results == Y_test.detach().cpu()).sum(dim=0) / len(Y_test)} %')
+
+
+@print_name
+def linear_layer():
+    X_train, X_test, Y_train, Y_test = load_regression_data()
+
+    from sklearn.linear_model import LinearRegression
+    clf = LinearRegression()
+
+    clf.fit(X_train, Y_train)
+
+    from mlalgorithms.deep_learning.layers.linear import Linear
+    from torch.optim import Adam
+    from mlalgorithms.metrics import RMSE
+    import torch.nn as nn
+
+    reg = Linear(X_train.shape[-1], 1)
+    config = DEFAULT_TRAINING_CONFIG
+    config.optimizer = Adam
+    config.loss_function = nn.L1Loss
+    config.lr = 0.5
+    config.epochs = 200
+
+
+    reg.fit(
+        X=torch.tensor(X_train, dtype=torch.float32), 
+        Y=torch.tensor(Y_train, dtype=torch.float32).unsqueeze(-1), 
+        config=config
+    )
+
+    print('EXPECTED \t: \t', Y_test)
+    print('SKLEARN \t: \t', clf.predict(X_test))
+    print('MLALGORITHMS \t: \t', reg.predict(torch.tensor(X_test, dtype=torch.float32), config=DEFAULT_INFERENCE_CONFIG).squeeze())
+
 
 if __name__ == "__main__":
     
@@ -240,4 +305,5 @@ if __name__ == "__main__":
     # tSNE()
 
     # nn()
+    linear_layer()
     pass

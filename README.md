@@ -38,7 +38,7 @@ cd MLAlgorithms
 - [ ] UMAP
 
 ## Deep Learning Layers
-- [ ] Linear Layer
+- [X] Linear Layer
 - [ ] Activation Functions (Sigmoid, ReLU, TanH)
 - [ ] Convolutional Layer
 - [ ] Max Pooling Layer

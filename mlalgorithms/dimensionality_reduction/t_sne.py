@@ -17,13 +17,13 @@ class tSNE(Model):
         nb_dims: int = None, 
         epsilon = 1e-4, 
         max_iter: int = 1000, 
-        learning_rate: float = 200.0,
+        lr: float = 200.0,
         perplexity: float = 40,
     ) -> None:
         self.nb_dims = nb_dims
         self.epsilon = epsilon
         self.max_iter = max_iter
-        self.learning_rate = learning_rate
+        self.lr = lr
         self.perplexity = perplexity
 
         self.lower_bound_search = 1e-10
@@ -48,7 +48,7 @@ class tSNE(Model):
             q_probs = self.q_joint_probs(history[-1])
             gradient = self.grad(p_probs, q_probs, history[-1])
             m_t = 0.5 if i < 250 else 0.8
-            y = history[-1] - self.learning_rate * gradient + m_t * (history[-1] - history[-2])
+            y = history[-1] - self.lr * gradient + m_t * (history[-1] - history[-2])
             history.append(y)
         self.y = y
         return self

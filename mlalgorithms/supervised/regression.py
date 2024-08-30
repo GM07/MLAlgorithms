@@ -22,9 +22,9 @@ class LinearRegression(Model):
         """
         Fits the linear model to the data
 
-        X : tensor of shape (nb_samples, nb_features)
-
-        Y : tensor of shape (nb_samples)
+        X   :   tensor of shape (nb_samples, nb_features)
+        
+        Y   :   tensor of shape (nb_samples)
         """
         X = self.add_bias(X)
         moore_penrose_inv: torch.Tensor = torch.linalg.inv(X.T.matmul(X) + self.get_regularization_coef(X.shape[-1]))

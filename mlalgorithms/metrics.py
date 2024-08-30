@@ -8,6 +8,9 @@ class Metric(ABC):
     def apply(self, expected: torch.Tensor, predicted: torch.Tensor):
         pass
 
+    def __call__(self, expected: torch.Tensor, predicted: torch.Tensor) -> torch.Any:
+        return self.apply(expected, predicted)
+
 
 class RMSE(Metric):
 
