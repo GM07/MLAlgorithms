@@ -35,6 +35,14 @@ cd MLAlgorithms
 ## Dimensionality reduction
 - [X] PCA
 - [X] t-SNE
+- [ ] UMAP
+
+## Deep Learning Layers
+- [ ] Linear Layer
+- [ ] Activation Functions (Sigmoid, ReLU, TanH)
+- [ ] Convolutional Layer
+- [ ] Max Pooling Layer
+- [ ] Average Pooling Layer
 
 ## Deep Learning
 - [X] Neural Network

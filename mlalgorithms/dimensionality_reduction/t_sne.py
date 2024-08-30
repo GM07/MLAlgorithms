@@ -6,6 +6,9 @@ from tqdm import tqdm
 
 class tSNE(Model):
     """
+    Implementation of t-SNE based on the paper "Visualizing Data using t-SNE" 
+    (https://www.jmlr.org/papers/volume9/vandermaaten08a/vandermaaten08a.pdf)
+    
     Implementation derived from https://towardsdatascience.com/understanding-t-sne-by-implementing-2baf3a987ab3
     """
 
