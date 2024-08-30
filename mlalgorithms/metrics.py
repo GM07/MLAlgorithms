@@ -15,4 +15,9 @@ class Metric(ABC):
 class RMSE(Metric):
 
     def apply(self, expected: torch.Tensor, predicted: torch.Tensor):
+        if expected.dim() == 1:
+            expected = expected.unsqueeze(-1)
+        if predicted.dim() == 1:
+            predicted = predicted.unsqueeze(-1)
+            
         return torch.sqrt((expected - predicted).T.matmul(expected - predicted) * (1 / expected.shape[0]))

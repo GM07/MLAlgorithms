@@ -25,18 +25,21 @@ class Linear(DeepModel):
         super().__init__(*args, **kwargs)
         self.input_size = input_size
         self.output_size = output_size
+        self.use_bias = bias
 
         # Create parameters for the weights and biases and make sure that requires_grad=True to 
         # keep gradients. 
         self.weights = nn.Parameter(torch.empty(self.input_size, self.output_size), requires_grad=True)
-        self.bias = nn.Parameter(torch.empty(self.output_size), requires_grad=True)
-
+        if self.use_bias:
+            self.bias = nn.Parameter(torch.empty(self.output_size), requires_grad=True)
+            
         self.initialize_parameters(self.input_size)
 
     def predict(self, X: torch.Tensor, config: InferenceConfig):
         assert X.shape[-1] == self.input_size, \
             f'The input shape of the given data ({X.shape[-1]}) is not compatible with the input size of the model ({self.input_size})'
         
-        Y = X.to(config.device) @ self.weights.to(config.device) + self.bias.to(config.device)
-        # print(self.weights)
+        Y = X.to(config.device) @ self.weights.to(config.device)
+        if self.use_bias:
+            Y += self.bias.to(config.device)
         return Y

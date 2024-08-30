@@ -269,23 +269,27 @@ def linear_layer():
     from mlalgorithms.metrics import RMSE
     import torch.nn as nn
 
-    reg = Linear(X_train.shape[-1], 1)
+    linear = Linear(X_train.shape[-1], 1, bias=True)
     config = DEFAULT_TRAINING_CONFIG
+    config.batch_size = 256
     config.optimizer = Adam
     config.loss_function = nn.L1Loss
-    config.lr = 0.5
+    config.lr = 1.0
     config.epochs = 200
 
-
-    reg.fit(
+    linear.fit(
         X=torch.tensor(X_train, dtype=torch.float32), 
         Y=torch.tensor(Y_train, dtype=torch.float32).unsqueeze(-1), 
         config=config
     )
 
-    print('EXPECTED \t: \t', Y_test)
-    print('SKLEARN \t: \t', clf.predict(X_test))
-    print('MLALGORITHMS \t: \t', reg.predict(torch.tensor(X_test, dtype=torch.float32), config=DEFAULT_INFERENCE_CONFIG).squeeze())
+    linear_pred = linear.predict(torch.tensor(X_test, dtype=torch.float32), config=DEFAULT_INFERENCE_CONFIG).squeeze()
+    sklearn_pred = torch.tensor(clf.predict(X_test), dtype=torch.float32).to(DEVICE)
+    expected_pred = torch.tensor(Y_test, dtype=torch.float32).to(DEVICE)
+    error = RMSE()
+
+    print('SKLEARN ERROR \t: \t', error(sklearn_pred, expected_pred).detach())
+    print('MLALGORITHMS ERROR \t: \t', error(linear_pred, expected_pred).detach())
 
 
 if __name__ == "__main__":
@@ -304,6 +308,7 @@ if __name__ == "__main__":
     # pca()
     # tSNE()
 
-    # nn()
-    linear_layer()
+    # linear_layer()
+    
+    nn()
     pass

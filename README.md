@@ -39,7 +39,6 @@ cd MLAlgorithms
 
 ## Deep Learning Layers
 - [X] Linear Layer
-- [ ] Activation Functions (Sigmoid, ReLU, TanH)
 - [ ] Convolutional Layer
 - [ ] Max Pooling Layer
 - [ ] Average Pooling Layer
