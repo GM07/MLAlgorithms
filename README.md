@@ -39,13 +39,12 @@ cd MLAlgorithms
 
 ## Deep Learning Layers
 - [X] Linear Layer
-- [ ] Convolutional Layer
-- [ ] Max Pooling Layer
-- [ ] Average Pooling Layer
+- [ ] Attention Layer
+- [X] Layer Normalization Layer
+- [X] Batch Normalization Layer
 
 ## Deep Learning
 - [X] Neural Network
-- [ ] CNN
 - [ ] LSTM
 - [ ] RNN
 - [ ] Transformer

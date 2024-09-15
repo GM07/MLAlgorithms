@@ -291,6 +291,81 @@ def linear_layer():
     print('SKLEARN ERROR \t: \t', error(sklearn_pred, expected_pred).detach())
     print('MLALGORITHMS ERROR \t: \t', error(linear_pred, expected_pred).detach())
 
+@print_name
+def batch_normalization():
+    import torch
+    import torch.nn as nn
+    import torch.nn.functional as F
+
+    from mlalgorithms.deep_learning.layers.normalization import BatchNormalization
+
+    X_1d = torch.Tensor([
+        [[1, 3, 2],
+         [1, 2, 3]],
+
+        [[3, 3, 2],
+         [2, 4, 4]],
+
+        [[4, 2, 2],
+         [1, 2, 4]],
+
+        [[3, 3, 2],
+         [3, 3, 2]]
+    ])
+
+    X_2d = torch.Tensor([
+        [[[1], [3], [2]],
+         [[1], [2], [3]]],
+
+        [[[3], [3], [2]],
+         [[2], [4], [4]]],
+
+        [[[4], [2], [2]],
+         [[1], [2], [4]]],
+
+        [[[3], [3], [2]],
+         [[3], [3], [2]]]
+    ])
+
+    norm_1d = nn.BatchNorm1d(2, momentum=1.0)
+    Y_1d = norm_1d(X_1d)
+    print('EXPECTED 1D : ', Y_1d)
+    bn = BatchNormalization(channel_dimension=1, channel_size=2)
+    print('MLALGORITHMS 1D : ', bn.predict(X_1d))
+
+    norm_2d = nn.BatchNorm2d(2, momentum=1.0)
+    Y_2d = norm_2d(X_2d)
+    print('EXPECTED 2D : ', Y_2d)
+    bn = BatchNormalization(channel_dimension=1, channel_size=2)
+    print('MLALGORITHMS 2D : ', bn.predict(X_2d))
+
+@print_name
+def layer_normalization():
+    import torch
+    import torch.nn as nn
+    import torch.nn.functional as F
+
+    from mlalgorithms.deep_learning.layers.normalization import LayerNormalization
+
+    X = torch.Tensor([
+        [[[1], [3], [2]],
+         [[1], [2], [3]]],
+
+        [[[3], [3], [2]],
+         [[2], [4], [4]]],
+
+        [[[4], [2], [2]],
+         [[1], [2], [4]]],
+
+        [[[3], [3], [2]],
+         [[3], [3], [2]]]
+    ])
+
+    norm = nn.LayerNorm((3, 1))
+    Y = norm(X)
+    print('EXPECTED : ', Y)
+    ln = LayerNormalization((3, 1))
+    print('MLALGORITHMS : ', ln.predict(X))
 
 if __name__ == "__main__":
     
@@ -309,6 +384,9 @@ if __name__ == "__main__":
     # tSNE()
 
     # linear_layer()
-    
-    nn()
+
+    # nn()
+
+    # batch_normalization()
+    # layer_normalization()
     pass
