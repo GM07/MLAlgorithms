@@ -45,7 +45,7 @@ cd MLAlgorithms
 
 ## Deep Learning
 - [X] Neural Network
-- [ ] LSTM
+- [X] LSTM
 - [ ] RNN
 - [ ] Transformer
 - [ ] Diffusion Model

@@ -14,6 +14,7 @@ from tqdm import tqdm
 class InferenceConfig:
     device: str
     batch_size: int = 1
+    init_hidden_size: torch.Tensor
 
 @dataclass
 class TrainingConfig(InferenceConfig):
