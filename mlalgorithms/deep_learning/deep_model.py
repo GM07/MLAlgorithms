@@ -15,6 +15,7 @@ class InferenceConfig:
     device: str
     batch_size: int = 1
     init_hidden_size: torch.Tensor = None # Used in models where an initial hidden state is needed (LSTM)
+    mask: torch.Tensor = None # Used by attention layer
 
 @dataclass
 class TrainingConfig(InferenceConfig):

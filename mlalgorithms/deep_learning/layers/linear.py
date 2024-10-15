@@ -1,7 +1,5 @@
 from mlalgorithms.deep_learning.deep_model import DeepModel, InferenceConfig
 
-from typing import List
-
 import torch
 import torch.nn as nn
 
@@ -16,9 +14,7 @@ class Linear(DeepModel):
         """
         
         input_size  :   Input size of the layer
-
         output_size :   Output size of the layer
-
         bias        :   Whether to use bias or not (`b` term in the equation y = Ax + b)
 
         """
