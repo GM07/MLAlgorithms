@@ -369,7 +369,7 @@ def layer_normalization():
 
 if __name__ == "__main__":
     
-    # kmeans()
+    kmeans()
     # dbscan()
 
     # naive_bayes()

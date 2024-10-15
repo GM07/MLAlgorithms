@@ -25,7 +25,16 @@ cd MLAlgorithms
 
 ## Clustering
 - [X] KMeans
+
+<p align="center">
+<img src="images/kmeans.png" alt="K-means Clustering" width="400" height="400">
+</p>
+
 - [X] DBSCAN
+
+<p align="center">
+<img src="images/dbscan.png" alt="DBSCAN Clustering" width="400" height="400">
+</p>
 
 ## Naive Bayes
 - [X] Gaussian Naive Bayes

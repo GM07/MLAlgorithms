@@ -14,7 +14,7 @@ from tqdm import tqdm
 class InferenceConfig:
     device: str
     batch_size: int = 1
-    init_hidden_size: torch.Tensor
+    init_hidden_size: torch.Tensor = None # Used in models where an initial hidden state is needed (LSTM)
 
 @dataclass
 class TrainingConfig(InferenceConfig):

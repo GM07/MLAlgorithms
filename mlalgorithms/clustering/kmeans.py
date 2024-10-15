@@ -62,9 +62,10 @@ class KMeans(Model):
         """
         Predicts to which clusters a set of samples belongs to
 
-        x : numpy array of shape (nb_samples, nb_features)
+        x : torch tensor of shape (nb_samples, nb_features)
         """
-        assert self.clusters_centroids is not None, "The fit() method must be called first"
+        if not hasattr(self, 'cluster_centroids'):
+            self.fit(X, None)
 
         nb_samples, _ = X.shape
 
