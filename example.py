@@ -14,24 +14,24 @@ else:
 DEFAULT_TRAINING_CONFIG = TrainingConfig(device=DEVICE, batch_size=32)
 DEFAULT_INFERENCE_CONFIG = InferenceConfig(device=DEVICE)
 
-def load_dataset(load_function, return_pt = False, *args, **kwargs):
+def load_dataset(load_function, return_pt = False, label_dtype=torch.int64, *args, **kwargs):
     from sklearn.model_selection import train_test_split
     X, Y = load_function(*args, **kwargs)
     a, b, c, d = train_test_split(X, Y, test_size=0.01, random_state=0)
     if return_pt:
-        return torch.Tensor(a), torch.Tensor(b), torch.tensor(c, dtype=torch.int64), torch.tensor(d, dtype=torch.int64)
+        return torch.Tensor(a), torch.Tensor(b), torch.tensor(c, dtype=label_dtype), torch.tensor(d, dtype=label_dtype)
     return a, b, c, d
 
 
 def load_regression_data(return_pt = False):
     from sklearn.datasets import load_diabetes
-    return load_dataset(load_diabetes, return_pt=return_pt, return_X_y=True)
+    return load_dataset(load_diabetes, return_pt=return_pt, return_X_y=True, label_dtype=torch.float64)
 
 def load_classification_data(return_pt = False):
     from sklearn.datasets import load_iris
     from sklearn.model_selection import train_test_split
     X, Y = load_iris(return_X_y=True)
-    a, b, c, d = train_test_split(X, Y, test_size=0.01, random_state=0)
+    a, b, c, d = train_test_split(X, Y, test_size=0.2, random_state=0)
     if return_pt:
         return torch.Tensor(a), torch.Tensor(b), torch.tensor(c, dtype=torch.int64), torch.tensor(d, dtype=torch.int64)
     return a, b, c, d
@@ -367,9 +367,44 @@ def layer_normalization():
     ln = LayerNormalization((3, 1))
     print('MLALGORITHMS : ', ln.predict(X))
 
+@print_name
+def decision_tree_classifier():
+    X_train, X_test, Y_train, Y_test = load_classification_data()
+    print('EXPECTED \t: \t', Y_test)
+
+    from sklearn.tree import DecisionTreeClassifier as dtc
+    clf = dtc(random_state=0)
+    clf.fit(X_train, Y_train)
+    print(clf.get_depth())
+    print('SKLEARN \t: \t', clf.predict(X_test))
+
+    from mlalgorithms.supervised.decision_tree import DecisionTreeClassifier
+    mla = DecisionTreeClassifier()
+    mla.fit(torch.Tensor(X_train), torch.LongTensor(Y_train))
+    print('MLALGORITHMS \t: \t', mla.predict(torch.Tensor(X_test)).squeeze())
+    print(mla.get_depth())
+
+@print_name
+def decision_tree_regressor():
+    X_train, X_test, Y_train, Y_test = load_regression_data()
+    print(Y_train.dtype)
+    print('EXPECTED \t: \t', Y_test)
+
+    from sklearn.tree import DecisionTreeRegressor as dtr
+    clf = dtr(random_state=0)
+    clf.fit(X_train, Y_train)
+    print(clf.get_depth())
+    print('SKLEARN \t: \t', clf.predict(X_test))
+
+    from mlalgorithms.supervised.decision_tree import DecisionTreeRegressor
+    mla = DecisionTreeRegressor()
+    mla.fit(torch.Tensor(X_train), torch.FloatTensor(Y_train))
+    print('MLALGORITHMS \t: \t', mla.predict(torch.Tensor(X_test)).squeeze())
+    print(mla.get_depth())
+
 if __name__ == "__main__":
     
-    kmeans()
+    # kmeans()
     # dbscan()
 
     # naive_bayes()
@@ -382,6 +417,9 @@ if __name__ == "__main__":
     
     # pca()
     # tSNE()
+
+    # decision_tree_classifier()
+    decision_tree_regressor()
 
     # linear_layer()
 

@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 import torch.nn as nn
 import torch
 
-class Model(nn.Module):
+class Model:
 
     @abstractmethod
     def fit(self, X: torch.Tensor, Y: torch.Tensor):

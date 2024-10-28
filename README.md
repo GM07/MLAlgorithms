@@ -41,10 +41,20 @@ cd MLAlgorithms
 - [X] Bernoulli Naive Bayes
 - [X] Multinomial Naive Bayes
 
-## Dimensionality reduction
+## Dimensionality Reduction
 - [X] PCA
 - [X] t-SNE
 - [ ] UMAP
+
+## Decision Trees
+- [X] Decision Tree Classifier
+- [X] Decision Tree Regressor
+
+## Ensemble Learning
+- [ ] Bagging
+- [ ] Boosting
+- [ ] XGBoost
+- [ ] Random Forests
 
 ## Deep Learning Layers
 - [X] Linear Layer
