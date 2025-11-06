@@ -7,10 +7,6 @@ class GaussianNaiveBayes(Model):
 
     def __init__(self, var_smoothing = 1e-9) -> None:
         super().__init__()
-        self.priors = None
-        self.means = None
-        self.vars = None
-        self.nb_classes = None
 
         # Used for smoothing the variance since we divide by the standard
         # deviation during predictions
@@ -41,10 +37,10 @@ class GaussianNaiveBayes(Model):
             x_class = X[Y == self.labels[c]]
 
             # Average along the samples to get the mean of all features
-            self.means[c] = x_class.mean(axis=0) 
+            self.means[c] = x_class.mean(dim=0) 
 
             # Same thing is done for the variance
-            self.vars[c] = x_class.var(axis=0) + self.var_smoothing
+            self.vars[c] = x_class.var(dim=0) + self.var_smoothing
 
         return self
 
@@ -68,7 +64,7 @@ class GaussianNaiveBayes(Model):
         for c in range(self.nb_classes):
             probabilities[:, c] += GaussianNaiveBayes.pdf(X, self.means[c], self.vars[c])
 
-        returned_value = self.labels[torch.argmax(probabilities, axis=1)]
+        returned_value = self.labels[torch.argmax(probabilities, dim=1)]
         return returned_value
 
     @staticmethod
@@ -76,16 +72,9 @@ class GaussianNaiveBayes(Model):
         """
         Computes the gaussian probabilty given an input X, a mean and a variance in the log space
         """
-        return -0.5 * torch.sum(torch.log(2 * torch.pi * torch.sqrt(var)) + (X - mean) ** 2 / torch.sqrt(var), axis=1)
-
+        return -0.5 * torch.sum(torch.log(2 * torch.pi * torch.sqrt(var)) + (X - mean) ** 2 / torch.sqrt(var), dim=1)
 
 class BernoulliNaiveBayes(Model):
-
-    def __init__(self) -> None:
-        super().__init__()
-        self.priors = None
-        self.conditional_probs = None
-        self.nb_classes = None
 
     def fit(self, X: torch.Tensor, Y: torch.Tensor):
         """
@@ -110,7 +99,7 @@ class BernoulliNaiveBayes(Model):
             x_class = X[Y == self.labels[c]]
 
             # Average along the samples of the given class to get the mean of all features
-            self.conditional_probs[c] = (1 + x_class.sum(axis=0)) / (counts[c] + 2)
+            self.conditional_probs[c] = (1 + x_class.sum(dim=0)) / (counts[c] + 2)
 
         return self
 
@@ -123,7 +112,7 @@ class BernoulliNaiveBayes(Model):
         
         """
         probabilities = torch.log(self.priors) + X @ torch.log(self.conditional_probs.T)
-        return self.labels[torch.argmax(probabilities, axis=1)]
+        return self.labels[torch.argmax(probabilities, dim=1)]
 
 
 class MultinomialNaiveBayes(Model):
@@ -172,5 +161,5 @@ class MultinomialNaiveBayes(Model):
         
         """
         probabilities = self.log_priors + X @ self.log_conditional_probs.T
-        return self.labels[torch.argmax(probabilities, axis=1)]
+        return self.labels[torch.argmax(probabilities, dim=1)]
 

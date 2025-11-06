@@ -31,11 +31,11 @@ class LinearRegression(Model):
         self._weights = moore_penrose_inv.matmul(X.T).matmul(Y)
         return self
 
-    def predict(self, X: torch.Tensor):
+    def predict(self, X: torch.Tensor) -> torch.Tensor:
         return self.add_bias(X) @ self._weights
 
-    def add_bias(self, X: torch.Tensor):
-        return torch.concatenate([X, torch.ones((X.shape[0], 1))], axis=1)
+    def add_bias(self, X: torch.Tensor) -> torch.Tensor:
+        return torch.concatenate([X, torch.ones((X.shape[0], 1))], dim=1)
 
     def get_regularization_coef(self, nb_features: int):
         return torch.zeros((nb_features, nb_features))

@@ -3,6 +3,7 @@ from mlalgorithms.utils import gini
 
 import torch
 from abc import abstractmethod
+from typing import Optional
 
 class TreeNode(Model):
     """ Node of a decision tree """
@@ -14,7 +15,7 @@ class TreeNode(Model):
         criterion_value: float,
         dispersion: float,
         categorical: bool = False,
-        decision: float = None
+        decision: Optional[float] = None
     ):
         """
         feature_index   : Index of the feature used to split the data
@@ -32,8 +33,8 @@ class TreeNode(Model):
         self.categorical = categorical
         self.decision = decision
 
-        self.left: TreeNode = None
-        self.right: TreeNode = None
+        self.left: Optional[TreeNode] = None
+        self.right: Optional[TreeNode] = None
 
     def is_leaf(self):
         return self.left is None and self.right is None
@@ -71,7 +72,7 @@ class TreeNode(Model):
             right = torch.where(X[:, self.feature_index] >= self.criterion_value)
         return left, right
 
-    def predict(self, X: torch.Tensor):
+    def predict(self, X: torch.Tensor) -> torch.Tensor:
 
         if self.is_leaf():
             return torch.ones(X.shape[0]) * self.decision
@@ -93,7 +94,7 @@ class DecisionTree(Model):
         self, 
         criterion: str = 'gini', 
         categorical_features = [],
-        max_depth: int = None,
+        max_depth: Optional[int] = None,
         min_samples_split: int = 2,
         eps: float = 1e-5
     ):
@@ -107,10 +108,10 @@ class DecisionTree(Model):
         self.min_samples_split = min_samples_split
         self.eps = eps
 
-        self.tree: TreeNode = None
+        self.tree: Optional[TreeNode] = None
 
     @abstractmethod
-    def _get_dispersion_score(self, left_group: torch.Tensor, right_group: torch.Tensor, Y: torch.Tensor, labels: torch.Tensor):
+    def _get_dispersion_score(self, left_group: torch.Tensor, right_group: torch.Tensor, Y: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
         pass
     
     @abstractmethod
@@ -202,8 +203,8 @@ class DecisionTreeClassifier(DecisionTree):
     def _get_dispersion_score(self, left_group: torch.Tensor, right_group: torch.Tensor, Y: torch.Tensor, labels: torch.Tensor):
         return gini([Y[left_group], Y[right_group]], labels)
 
-    def _get_leaf_decision(self, Y: torch.Tensor):
-        return torch.bincount(Y).argmax() if len(Y) > 0 else 0 # Use the most frequent label as the decision
+    def _get_leaf_decision(self, Y: torch.Tensor) -> float:
+        return torch.bincount(Y).argmax().item() if len(Y) > 0 else 0 # Use the most frequent label as the decision
 
     def fit(self, X: torch.Tensor, Y: torch.Tensor):
         assert Y.dtype in [torch.int32, torch.int64], "Labels must be integers"
@@ -221,7 +222,7 @@ class DecisionTreeRegressor(DecisionTree):
         right_group_score = torch.square(Y_right_group - Y_right_group.mean()).sum() * len(Y_right_group) / nb_samples
         return left_group_score + right_group_score
 
-    def _get_leaf_decision(self, Y: torch.Tensor):
+    def _get_leaf_decision(self, Y: torch.Tensor) -> float:
         return Y.mean()
 
     def fit(self, X: torch.Tensor, Y: torch.Tensor):

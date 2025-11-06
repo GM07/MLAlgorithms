@@ -7,7 +7,7 @@ import torch.nn.functional as F
 
 class MultiHeadAttention(DeepModel):
     def __init__(self, head_size, num_heads, *args, **kwargs):
-        super(self).__init__(*args, **kwargs)
+        super(DeepModel, self).__init__(*args, **kwargs)
         self.head_size = head_size
         self.num_heads = num_heads
 
@@ -42,7 +42,7 @@ class MultiHeadAttention(DeepModel):
         attented_values = attention_weights @ values
         return self.merge_heads(attented_values)
 
-    def split_heads(self, tensor: torch.FloatTensor):
+    def split_heads(self, tensor: torch.Tensor):
         """Split all vectors between heads"""
         batch_size, seq_len, _ = tensor.shape
         inputs = tensor.view(batch_size, seq_len, self.num_heads, -1)

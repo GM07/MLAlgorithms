@@ -47,7 +47,7 @@ class LSTM(DeepModel):
             nn.init.uniform_(param, a=-(1 / model_dimension) ** 0.5, b=(1 / model_dimension) ** 0.5)
 
 
-    def predict(self, X: torch.Tensor, config: InferenceConfig = None):
+    def predict(self, X: torch.Tensor, config: InferenceConfig) -> torch.Tensor:
         """
         Encodes the sequences of X into a vector of size `self.hidden_size`. We expect
         the config.init_hidden_size to have the initial state of the hidden states. The
@@ -60,10 +60,14 @@ class LSTM(DeepModel):
         X   :   (nb_samples, seq_length, hidden_size)
 
         """
+
+        assert config.init_hidden_size, 'The inital hidden state must be provided'
+
         h_t = config.init_hidden_size[0, :, :self.hidden_size]
         c_t = config.init_hidden_size[0, :, self.hidden_size:]
 
-        self.forward(X, (h_t, c_t))
+        output, (h_t, c_t) = self.forward(X, (h_t, c_t))
+        return output
 
     def forward(self, X: torch.Tensor, hidden_states: Tuple[torch.Tensor, torch.Tensor]):
         """

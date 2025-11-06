@@ -12,7 +12,7 @@ class KMeans(Model):
         self.nb_iterations = nb_iterations
 
     @torch.no_grad()
-    def fit(self, X: torch.Tensor, Y: torch.Tensor = None):
+    def fit(self, X: torch.Tensor, Y: torch.Tensor):
         """
         Fits the centroids to the clusters present in the data
 
@@ -35,7 +35,7 @@ class KMeans(Model):
             for cluster in range(self.nb_clusters):
                 cluster_samples = torch.where(assigments == cluster)
                 if len(cluster_samples) > 0:
-                    centroids[cluster] = X[cluster_samples].mean(axis=0)
+                    centroids[cluster] = X[cluster_samples].mean(dim=0)
 
             old_assigments = assigments.clone()
 
@@ -65,11 +65,11 @@ class KMeans(Model):
         x : torch tensor of shape (nb_samples, nb_features)
         """
         if not hasattr(self, 'cluster_centroids'):
-            self.fit(X, None)
+            self.fit(X, torch.Tensor([]))
 
         nb_samples, _ = X.shape
 
-        closest_clusters = torch.zeros(nb_samples, dtype=int)
+        closest_clusters = torch.zeros(nb_samples).int()
         for sample_index, sample in enumerate(X):
             current_cluster = closest_clusters[sample_index]
             for cluster in range(1, self.clusters_centroids.shape[0]):

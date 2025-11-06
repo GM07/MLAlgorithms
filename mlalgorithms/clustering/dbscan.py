@@ -23,7 +23,7 @@ class DBSCAN(Model):
         nb_samples, _ = X.shape
         distances: torch.Tensor = euclidian_pairwise_distances(X)        
         neighbors = torch.where(distances <= self.epsilon, 1, 0)
-        neighbors_count = neighbors.sum(axis=0)
+        neighbors_count = neighbors.sum(dim=0)
 
         self.core_samples = torch.where(neighbors_count >= self.min_samples, True, False)
         self.labels = torch.zeros((nb_samples), dtype=torch.int64) - 1
@@ -39,7 +39,7 @@ class DBSCAN(Model):
         return self
 
     def predict(self, X: torch.Tensor):
-        self.fit(X, None)
+        self.fit(X, torch.Tensor([]))
         return self.labels
 
     def expand_cluster(self, starting_core_sample: int, neighbors: torch.Tensor, cluster_to_assign: int):
@@ -61,4 +61,4 @@ class DBSCAN(Model):
 
             for next_point_index in next_point_indices:
                 if self.labels[next_point_index] == -1:
-                    queue.append(next_point_index.item())
+                    queue.append(int(next_point_index.item()))

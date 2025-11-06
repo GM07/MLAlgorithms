@@ -28,7 +28,7 @@ class LayerNormalization(DeepModel):
         self.weight = nn.Parameter(torch.ones(normalized_shape))
         self.bias = nn.Parameter(torch.zeros(normalized_shape))
 
-    def predict(self, X: torch.FloatTensor):
+    def predict(self, X: torch.Tensor, config: InferenceConfig):
         means = X.mean(dim=self.dims, keepdim=True)
         vars = X.var(dim=self.dims, unbiased=False, keepdim=True)
         normalized_X = (X - means) / torch.sqrt(vars + self.eps)
@@ -62,7 +62,7 @@ class BatchNormalization(DeepModel):
         self.register_buffer('running_mean', torch.zeros(channel_size))
         self.register_buffer('running_var', torch.ones(channel_size))
 
-    def predict(self, X: torch.FloatTensor):
+    def predict(self, X: torch.Tensor, config: InferenceConfig):
         nb_dims = X.dim()
         stats_dims = list(range(nb_dims))
         del stats_dims[self.channel_dimension]

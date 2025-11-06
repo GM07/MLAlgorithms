@@ -1,8 +1,11 @@
-import torch
 from mlalgorithms.model import Model
 from mlalgorithms.distances import squared_euclidian_pairwise_distances
 
+from typing import Optional
+
 from tqdm import tqdm
+import torch
+
 
 class tSNE(Model):
     """
@@ -14,7 +17,7 @@ class tSNE(Model):
 
     def __init__(
         self, 
-        nb_dims: int = None, 
+        nb_dims: int, 
         epsilon = 1e-4, 
         max_iter: int = 1000, 
         lr: float = 200.0,
@@ -54,7 +57,7 @@ class tSNE(Model):
         return self
 
     def predict(self, X: torch.Tensor):
-        self.fit(X, None)
+        self.fit(X, torch.tensor([]))
         return self.y
 
     def p_conditional_probs(self, distances: torch.Tensor, stds: torch.Tensor):
@@ -68,17 +71,17 @@ class tSNE(Model):
         numerator = torch.exp(-distances / (2 * torch.square(stds.reshape((-1,1)))))
         numerator.fill_diagonal_(0.0)
         numerator += self.epsilon
-        denominator = numerator.sum(axis=1).reshape([-1, 1])
+        denominator = numerator.sum(dim=1).reshape([-1, 1])
         return numerator / denominator
 
-    def compute_perplexity(self, conditional_probabilities: torch.Tensor) -> float:
+    def compute_perplexity(self, conditional_probabilities: torch.Tensor) -> torch.Tensor:
         """
         Computes the perplexity of a matrix of conditional probabilities
         
         Returns :
         Perplexity value
         """
-        return 2 ** (-torch.sum(conditional_probabilities * torch.log2(conditional_probabilities), axis=1))
+        return 2 ** (-torch.sum(conditional_probabilities * torch.log2(conditional_probabilities), dim=1))
 
     def find_stds(self, distances, perplexity):
         """
@@ -136,5 +139,5 @@ class tSNE(Model):
         prob_diffs = torch.unsqueeze(p_joint - q_joint, 2)
         sample_diffs = torch.unsqueeze(samples, 1) - torch.unsqueeze(samples, 0)
         dist_term = torch.unsqueeze(1 / (1 + squared_euclidian_pairwise_distances(samples)), 2)
-        return 4 * torch.sum(prob_diffs * sample_diffs * dist_term, axis=1)
+        return 4 * torch.sum(prob_diffs * sample_diffs * dist_term, dim=1)
 

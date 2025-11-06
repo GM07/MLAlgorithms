@@ -6,7 +6,7 @@ import torch
 class Model:
 
     @abstractmethod
-    def fit(self, X: torch.Tensor, Y: torch.Tensor):
+    def fit(self, X: torch.Tensor, Y: torch.Tensor) -> 'Model':
         """
         Fits the model to the data
 
@@ -19,7 +19,7 @@ class Model:
         return self
 
     @abstractmethod
-    def predict(self, X: torch.Tensor):
+    def predict(self, X: torch.Tensor) -> torch.Tensor:
         """
         Predicts the classes of samples
 

@@ -1,10 +1,12 @@
 from mlalgorithms.model import Model
 
+from typing import Optional
+
 import torch
 
 class PCA(Model):
 
-    def __init__(self, nb_dims: int = None) -> None:
+    def __init__(self, nb_dims: Optional[int] = None) -> None:
         self.nb_dims = nb_dims
         super().__init__()
 
@@ -13,7 +15,7 @@ class PCA(Model):
         # In this case Y is not used since PCA does not require any training
 
         # Data needs to be centered before applying PCA
-        self.mean = torch.unsqueeze(X.mean(axis=0), axis=0)
+        self.mean = torch.unsqueeze(X.mean(dim=0), dim=0)
         X_centered = X - self.mean
 
         self.U, self.S, Vh = torch.linalg.svd(X_centered, full_matrices=False)
@@ -22,7 +24,7 @@ class PCA(Model):
         return self
 
     def predict(self, X: torch.Tensor):
-        self.fit(X, None)
+        self.fit(X, torch.tensor([]))
         return (X - self.mean) @ self.V.T
 
     @staticmethod

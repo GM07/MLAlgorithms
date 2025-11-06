@@ -14,15 +14,15 @@ from tqdm import tqdm
 class InferenceConfig:
     device: str
     batch_size: int = 1
-    init_hidden_size: torch.Tensor = None # Used in models where an initial hidden state is needed (LSTM)
-    mask: torch.Tensor = None # Used by attention layer
+    init_hidden_size: torch.Tensor | None = None # Used in models where an initial hidden state is needed (LSTM)
+    mask: torch.Tensor | None = None # Used by attention layer
 
 @dataclass
 class TrainingConfig(InferenceConfig):
     epochs: int = 100
     lr: float = 0.01
     # TODO : Add support for multiple optimizers and loss functions
-    optimizer = O.Adam
+    optimizer = O.adamw.AdamW
     loss_function = nn.CrossEntropyLoss
 
 class DeepModel(nn.Module):
@@ -71,7 +71,7 @@ class DeepModel(nn.Module):
         return self
 
     @abstractmethod
-    def predict(self, X: torch.Tensor, config: InferenceConfig = None):
+    def predict(self, X: torch.Tensor, config: InferenceConfig) -> torch.Tensor:
         """
         Predicts the classes of samples
 

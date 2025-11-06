@@ -10,7 +10,7 @@ class Linear(DeepModel):
     The `b` term is optional
     """
 
-    def __init__(self, input_size: int, output_size: int,  bias: bool = False, *args, **kwargs) -> None:
+    def __init__(self, input_size: int, output_size: int,  bias: bool = False) -> None:
         """
         
         input_size  :   Input size of the layer
@@ -18,7 +18,7 @@ class Linear(DeepModel):
         bias        :   Whether to use bias or not (`b` term in the equation y = Ax + b)
 
         """
-        super().__init__(*args, **kwargs)
+        super().__init__()
         self.input_size = input_size
         self.output_size = output_size
         self.use_bias = bias

@@ -5,16 +5,16 @@ import torch
 class Metric(ABC):
 
     @abstractmethod
-    def apply(self, expected: torch.Tensor, predicted: torch.Tensor):
+    def apply(self, expected: torch.Tensor, predicted: torch.Tensor) -> torch.Tensor:
         pass
 
-    def __call__(self, expected: torch.Tensor, predicted: torch.Tensor) -> torch.Any:
+    def __call__(self, expected: torch.Tensor, predicted: torch.Tensor) -> torch.Tensor:
         return self.apply(expected, predicted)
 
 
 class RMSE(Metric):
 
-    def apply(self, expected: torch.Tensor, predicted: torch.Tensor):
+    def apply(self, expected: torch.Tensor, predicted: torch.Tensor) -> torch.Tensor:
         if expected.dim() == 1:
             expected = expected.unsqueeze(-1)
         if predicted.dim() == 1:
